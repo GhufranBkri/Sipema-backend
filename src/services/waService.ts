@@ -7,7 +7,7 @@ import { PengaduanMasyarakatDTO } from '$entities/PengaduanMasyarakat';
 import { getStatusMessage } from '$utils/whatsaapp.utils';
 
 export type SendMessageResponse = { success: boolean } | {};
-
+// test aja
 
 class WaService {
     private apiUrl: string;
