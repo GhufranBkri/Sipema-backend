@@ -24,6 +24,8 @@ enum Status {
   COMPLETED
 }
 
+
+
 model User {
   id            String      @id @default(cuid())
   email         String
@@ -36,6 +38,8 @@ model User {
   role          Roles
   // Relasi untuk pelapor
   pengaduan     Pengaduan[] @relation("pelapor")
+  // relasi untuk Pelaporan WBS
+  pengaduanWBS PelaporanWBS[] @relation("pelapor")
   // Relasi untuk petugas unit
   unit_petugas  Unit?       @relation("petugas")
 }
@@ -56,6 +60,28 @@ model Kategori {
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
   PengaduanMasyarakat PengaduanMasyarakat[]
+}
+
+model PelaporanWBS {
+  id             String       @id  @default(cuid())
+  judul          String
+  deskripsi      String
+  tanggalKejadian DateTime
+  lokasi         String
+  kategoriId     String
+  kategori       KategoriWBS  @relation(fields: [kategoriId], references: [id])
+  pelaporId      String?
+  pelapor        User?      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
+  status         Status     @default(PENDING)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model KategoriWBS {
+  id          String         @id @default(cuid())
+  nama        String         @unique
+  deskripsi   String?
+  pelaporan   PelaporanWBS[]
 }
 
 model PengaduanMasyarakat {
