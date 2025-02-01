@@ -75,6 +75,7 @@ model PelaporanWBS {
   status         Status     @default(PENDING)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
+  response      String?
 }
 
 model KategoriWBS {

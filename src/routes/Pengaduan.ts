@@ -8,7 +8,6 @@ import * as filterPengaduanMiddleware from "$middlewares/filterPengaduanMiddlewa
 
 const PengaduanRoutes = new Hono();
 
-
 PengaduanRoutes.get("/",
     authMiddleware.checkJwt,
     authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]),
@@ -16,12 +15,9 @@ PengaduanRoutes.get("/",
     PengaduanController.getAll
 )
 
-
-
 PengaduanRoutes.get("/:id",
     authMiddleware.checkJwt, authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]), PengaduanController.getById
 )
-
 
 PengaduanRoutes.post("/",
     authMiddleware.checkJwt, authMiddleware.checkRole([Roles.USER]), pengaudanValidation.validatePengaduanDTO, PengaduanController.create

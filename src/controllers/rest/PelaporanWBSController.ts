@@ -8,12 +8,13 @@ import {
 import { PelaporanWBSDTO } from "$entities/PelaporanWBS";
 import { FilteringQueryV2 } from "$entities/Query";
 import { checkFilteringQueryV2 } from "$controllers/helpers/CheckFilteringQuery";
-// import { UserJWTDAO } from "$entities/User";
+import { UserJWTDAO } from "$entities/User";
 
 export async function create(c: Context): Promise<TypedResponse> {
   const data: PelaporanWBSDTO = await c.req.json();
+  const user: UserJWTDAO = c.get("jwtPayload");
 
-  const serviceResponse = await PelaporanWBSService.create(data);
+  const serviceResponse = await PelaporanWBSService.create(user, data);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
@@ -27,10 +28,11 @@ export async function create(c: Context): Promise<TypedResponse> {
 }
 
 export async function getAll(c: Context): Promise<TypedResponse> {
-  const filters: FilteringQueryV2 = checkFilteringQueryV2(c);
-  //   const user: UserJWTDAO = c.get("jwtPayload");
+  const filters: FilteringQueryV2 =
+    c.get("filters") || checkFilteringQueryV2(c);
+  const user: UserJWTDAO = c.get("jwtPayload");
 
-  const serviceResponse = await PelaporanWBSService.getAll(filters);
+  const serviceResponse = await PelaporanWBSService.getAll(filters, user);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
