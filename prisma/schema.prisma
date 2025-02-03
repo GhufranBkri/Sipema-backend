@@ -15,6 +15,7 @@ enum Roles {
   ADMIN
   PETUGAS_SUPER
   PETUGAS
+  KEPALA_PETUGAS_UNIT
 }
 
 enum Status {
@@ -41,15 +42,18 @@ model User {
   // relasi untuk Pelaporan WBS
   pengaduanWBS PelaporanWBS[] @relation("pelapor")
   // Relasi untuk petugas unit
-  unit_petugas  Unit?       @relation("petugas")
+  unit_petugas  Unit?     @relation("petugas", fields: [unitId], references: [id])
+  unitId        String?
+  unit_kepala   Unit?     @relation("kepalaUnit")
 }
 
 model Unit {
   id                  String                @id @default(cuid())
   nama_unit           String                @unique
   pengaduan           Pengaduan[]
-  petugas             User?                 @relation("petugas", fields: [petugasId], references: [no_identitas])
-  petugasId           String?               @unique
+  petugas             User[]                @relation("petugas")
+  kepalaUnit          User                  @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
+  kepalaUnitId        String                @unique
   PengaduanMasyarakat PengaduanMasyarakat[]
 }
 
@@ -75,7 +79,7 @@ model PelaporanWBS {
   status         Status     @default(PENDING)
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
-  response      String?
+  response       String?
 }
 
 model KategoriWBS {
