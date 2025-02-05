@@ -274,6 +274,19 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
+    await Promise.all(idArray.map(async (nama) => {
+      await prisma.pengaduan.deleteMany({
+        where: {
+          nameUnit: nama,
+        },
+      });
+
+      await prisma.pengaduanMasyarakat.deleteMany({
+        where: {
+          nameUnit: nama,
+        }
+      })
+    }))
     idArray.forEach(async (nama_unit) => {
       await prisma.unit.delete({
         where: {

@@ -21,10 +21,13 @@ export async function create(c: Context): Promise<TypedResponse> {
 }
 
 export async function getAll(c: Context): Promise<TypedResponse> {
-    const filters: FilteringQueryV2 = c.get("filters") || checkFilteringQueryV2(c);
+    const filterByRole: FilteringQueryV2 = c.get("filters")  
+    const filter: FilteringQueryV2 = checkFilteringQueryV2(c); 
     const user: UserJWTDAO = c.get("jwtPayload");
 
-    const serviceResponse = await PengaduanService.getAll(filters, user)
+
+    
+    const serviceResponse = await PengaduanService.getAll(filter, filterByRole, user)
 
     if (!serviceResponse.status) {
         return handleServiceErrorWithResponse(c, serviceResponse)

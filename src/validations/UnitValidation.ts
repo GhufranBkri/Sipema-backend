@@ -250,13 +250,13 @@ export async function validationDeletedUnit(c: Context, next: Next) {
   const idArray: string[] = JSON.parse(ids);
   // Check all unit exist before proceeding
   await Promise.all(
-    idArray.map(async (id) => {
+    idArray.map(async (name) => {
       const unit = await prisma.unit.findUnique({
-        where: { id },
+        where: { nama_unit: name },
       });
       if (!unit) {
         invalidFields.push(
-          generateErrorStructureParams("ids", `User with id: ${id} not found`)
+          generateErrorStructureParams("ids", `User with id: ${name} not found`)
         );
       }
       return unit;

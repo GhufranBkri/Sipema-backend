@@ -62,37 +62,55 @@ export async function create(
 export type GetAllResponse = PagedList<Pengaduan[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
+  filterByRole: FilteringQueryV2,
   user: UserJWTDAO
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
+    // First, build role-based filters
+    const roleFilters = buildFilterQueryLimitOffsetV2(filterByRole);
+    
+    // Then build regular filters
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
-    usedFilters.include = {
-      pelaporId: false,
-      kategori: {
-        select: {
-          nama: true,
-        },
-      },
-      pelapor:
-        user.role === Roles.PETUGAS_SUPER
-          ? {
-              select: {
-                name: true,
-                no_identitas: true,
-                email: true,
-                role: true,
-                program_studi: true,
-              },
-            }
-          : false,
-      unit: {
-        select: {
-          nama_unit: true,
+    
+    // Combine the where conditions from both filters
+    const combinedWhere = {
+      AND: [
+        roleFilters.where || {},
+        usedFilters.where || {}
+      ]
+    };
 
-          petugas: {
-            select: {
-              no_identitas: true,
-              name: true,
+    // Use the combined filters with the include options
+    const finalFilters = {
+      ...usedFilters,
+      where: combinedWhere,
+      include: {
+        pelaporId: false,
+        kategori: {
+          select: {
+            nama: true,
+          },
+        },
+        pelapor:
+          user.role === Roles.PETUGAS_SUPER
+            ? {
+                select: {
+                  name: true,
+                  no_identitas: true,
+                  email: true,
+                  role: true,
+                  program_studi: true,
+                },
+              }
+            : false,
+        unit: {
+          select: {
+            nama_unit: true,
+            petugas: {
+              select: {
+                no_identitas: true,
+                name: true,
+              },
             },
           },
         },
@@ -100,9 +118,9 @@ export async function getAll(
     };
 
     const [PengaduanDTO, totalData] = await Promise.all([
-      prisma.pengaduan.findMany(usedFilters),
+      prisma.pengaduan.findMany(finalFilters),
       prisma.pengaduan.count({
-        where: usedFilters.where,
+        where: combinedWhere,
       }),
     ]);
 
