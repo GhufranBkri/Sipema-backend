@@ -16,19 +16,28 @@ PengaduanRoutes.get("/",
 )
 
 PengaduanRoutes.get("/:id",
-    authMiddleware.checkJwt, authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]), PengaduanController.getById
+    authMiddleware.checkJwt, 
+    authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]),
+     PengaduanController.getById
 )
 
 PengaduanRoutes.post("/",
-    authMiddleware.checkJwt, authMiddleware.checkRole([Roles.USER]), pengaudanValidation.validatePengaduanDTO, PengaduanController.create
+    authMiddleware.checkJwt, 
+    authMiddleware.checkRole([Roles.USER]), 
+    pengaudanValidation.validatePengaduanDTO, 
+    PengaduanController.create
 )
 
 PengaduanRoutes.put("/:id",
-    authMiddleware.checkJwt, authMiddleware.checkRole([Roles.PETUGAS, Roles.PETUGAS_SUPER]), PengaduanController.update
+    authMiddleware.checkJwt, 
+    authMiddleware.checkRole([Roles.PETUGAS, Roles.PETUGAS_SUPER]), 
+    PengaduanController.update
 )
 
 PengaduanRoutes.delete("/",
-    authMiddleware.checkJwt, authMiddleware.checkRole([Roles.PETUGAS, Roles.PETUGAS_SUPER]), PengaduanController.deleteByIds
+    authMiddleware.checkJwt, 
+    authMiddleware.checkRole([Roles.PETUGAS, Roles.PETUGAS_SUPER]), 
+    PengaduanController.deleteByIds
 )
 
 export default PengaduanRoutes

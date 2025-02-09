@@ -25,8 +25,6 @@ export async function getAll(c: Context): Promise<TypedResponse> {
     const filter: FilteringQueryV2 = checkFilteringQueryV2(c); 
     const user: UserJWTDAO = c.get("jwtPayload");
 
-
-    
     const serviceResponse = await PengaduanService.getAll(filter, filterByRole, user)
 
     if (!serviceResponse.status) {

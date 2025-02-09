@@ -36,10 +36,34 @@ export async function create(data: PengaduanMasyarakatDTO): Promise<ServiceRespo
 }
 
 export type GetAllResponse = PagedList<PengaduanMasyarakat[]> | {}
-export async function getAll(filters: FilteringQueryV2, user: UserJWTDAO): Promise<ServiceResponse<GetAllResponse>> {
+export async function getAll(
+    filters: FilteringQueryV2,
+    filterByRole: FilteringQueryV2, 
+    user: UserJWTDAO
+): Promise<ServiceResponse<GetAllResponse>> {
     try {
-        const usedFilters = buildFilterQueryLimitOffsetV2(filters)
-        usedFilters.include = {
+
+        // First, build role-based filters
+    const roleFilters = buildFilterQueryLimitOffsetV2(filterByRole);
+    
+    // Then build regular filters
+    const usedFilters = buildFilterQueryLimitOffsetV2(filters);
+
+        // Combine the where conditions from both filters
+        const combinedWhere = {
+            AND: [
+              roleFilters.where || {},
+              usedFilters.where || {}
+            ]
+          };
+        
+          
+        
+
+          const finalFilters = {
+            ...usedFilters,
+            where: combinedWhere,
+            include : {
             no_telphone: false,
             nama: false,
             unit: {
@@ -55,16 +79,18 @@ export async function getAll(filters: FilteringQueryV2, user: UserJWTDAO): Promi
 
             }
         }
+    } 
 
         const [pengaduanMasyarakat, totalData] = await Promise.all([
-            prisma.pengaduanMasyarakat.findMany(usedFilters),
+            prisma.pengaduanMasyarakat.findMany(finalFilters),
             prisma.pengaduanMasyarakat.count({
-                where: usedFilters.where
+                where: combinedWhere
             })
         ])
 
         let totalPage = 1
-        if (totalData > usedFilters.take) totalPage = Math.ceil(totalData / usedFilters.take)
+        if (totalData > usedFilters.take) 
+            totalPage = Math.ceil(totalData / usedFilters.take)
 
         return {
             status: true,
