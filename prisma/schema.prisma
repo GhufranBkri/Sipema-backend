@@ -105,6 +105,7 @@ model PengaduanMasyarakat {
   filePendukung String?
   no_telphone   String
   filePetugas   String?
+  harapan_pelapor String?
 }
 
 model Pengaduan {
@@ -120,6 +121,7 @@ model Pengaduan {
   kategori      Kategori @relation(fields: [kategoriId], references: [id])
   pelapor       User     @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   unit          Unit     @relation(fields: [nameUnit], references: [nama_unit])
+  harapan_pelapor String?
   filePendukung String?
   response      String?
   filePetugas   String?

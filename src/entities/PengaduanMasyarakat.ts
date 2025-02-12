@@ -13,4 +13,5 @@ export interface PengaduanMasyarakatDTO {
     no_telphone: string;
     filePendukung: string;
     filePetugas?: string;
+    harapanPelapor?: string;
 }

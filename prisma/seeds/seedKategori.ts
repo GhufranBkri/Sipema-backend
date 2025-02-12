@@ -5,29 +5,60 @@ export async function seedKategori(prisma: PrismaClient) {
     if (countKategori === 0) {
         await prisma.kategori.create({
             data: {
-                nama: "Elektronik"
+                nama: "Akademik"
             }
         });
         await prisma.kategori.create({
             data: {
-                nama: "Furniture"
+                nama: "Fasilitas Kampus"
             }
         });
         await prisma.kategori.create({
             data: {
-                nama: "Kendaraan"
+                nama: "Administrasi dan Layanan"
             }
         });
         await prisma.kategori.create({
             data: {
-                nama: "Perlengkapan Rumah"
+                nama: "Keamanan dan Ketertiban"
             }
         });
         await prisma.kategori.create({
             data: {
-                nama: "Peralatan Kantor"
+                nama: "Etika dan Perilaku"
             }
         });
+        await prisma.kategori.create({
+            data: {
+                nama: "Keuangan dan Beasiswa"
+            }
+        });
+        await prisma.kategori.create({
+            data: {
+                nama: "Teknologi Informasi dan Sistem"
+            }
+        });
+        await prisma.kategori.create({
+            data: {
+                nama: "Pengajaran dan Pembelajaran"
+            }
+        });
+        await prisma.kategori.create({
+            data: {
+                nama: "Kemahasiswaan"
+            }
+        });
+        await prisma.kategori.create({
+            data: {
+                nama: "Kerjasama dan Hubungan Masyarakat"
+            }
+        });
+        await prisma.kategori.create({
+            data: {
+                nama: "Lainnya"
+            }
+        });
+
         console.log("Kategori seeded");
     }
 }
