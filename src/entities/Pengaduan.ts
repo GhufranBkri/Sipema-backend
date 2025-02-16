@@ -11,4 +11,5 @@ export interface PengaduanDTO {
     filePendukung?: string;
     filePetugas?: string;
     harapanPelapor?: string;
+
 }

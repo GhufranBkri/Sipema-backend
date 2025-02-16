@@ -20,25 +20,25 @@ export async function validateUnitCreateDTO(c: Context, next: Next) {
   if (!data.kepalaUnit) {
     invalidFields.push(generateErrorStructure("kepalaUnit", "cannot be empty"));
   }
-
-  // Validate petugas if provided
-  if (data.petugasId) {
-    // Check if user exists and is a PETUGAS
+  // Validate kepalaUnit if provided
+  if (data.kepalaUnit) {
+    // Check if user exists and is a KEPALA_PETUGAS_UNIT
     const existingUser = await prisma.user.findUnique({
-      where: { no_identitas: data.petugasId },
+      where: { no_identitas: data.kepalaUnit },
     });
 
     if (!existingUser) {
-      invalidFields.push(generateErrorStructure("petugasId", "user not found"));
-    } else if (existingUser.role !== "PETUGAS") {
+      invalidFields.push(generateErrorStructure("kepalaUnit", "user not found"));
+    } else if (existingUser.role !== "KEPALA_PETUGAS_UNIT") {
       invalidFields.push(
         generateErrorStructure(
-          "petugasId",
+          "kepalaUnit",
           "user does not have the required role"
         )
       );
     }
   }
+  
   // Check if unit name already exists
   const existingUnit = await prisma.unit.findUnique({
     where: { nama_unit: data.nama_unit },

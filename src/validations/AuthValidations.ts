@@ -25,7 +25,7 @@ export async function validateRegisterDTO(c: Context, next: Next) {
     })
 
     if (userExist != null) {
-        invalidFields.push("email already used")
+        invalidFields.push("no identity already used")
     }
     if (invalidFields.length > 0) {
         return response_bad_request(c, "Bad Request", invalidFields);
