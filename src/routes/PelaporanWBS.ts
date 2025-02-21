@@ -10,7 +10,7 @@ const PelaporanWBSRoutes = new Hono();
 PelaporanWBSRoutes.get(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]),
+  authMiddleware.checkRole([Roles.PETUGAS, Roles.DOSEN, Roles.PETUGAS_SUPER]),
   filterPengaduanMiddleware.filterPengaduanByRole,
   PelaporanWBSController.getAll
 );
@@ -24,7 +24,7 @@ PelaporanWBSRoutes.get(
 PelaporanWBSRoutes.post(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]),
+  authMiddleware.checkRole([Roles.DOSEN]),
   pengaudanValidation.validatePelaporanWBSDTO,
   PelaporanWBSController.create
 );

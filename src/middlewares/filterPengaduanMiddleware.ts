@@ -31,6 +31,24 @@ export async function filterPengaduanByRole(c: Context, next: Next) {
       };
       break;
 
+
+    case Roles.DOSEN:
+      filters.filters = {
+        ...filters.filters,
+        pelaporId: noIdentitas,
+      };
+      break;
+
+
+    case Roles.DOSEN:
+    filters.filters = {
+      ...filters.filters,
+      pelaporId: noIdentitas,
+    };
+    break;
+
+      
+
     case Roles.PETUGAS:
       const officerUnit = await prisma.unit.findFirst({
         where: { 

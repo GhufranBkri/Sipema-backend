@@ -10,20 +10,20 @@ const PengaduanRoutes = new Hono();
 
 PengaduanRoutes.get("/",
     authMiddleware.checkJwt,
-    authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]),
+    authMiddleware.checkRole([Roles.PETUGAS,Roles.DOSEN,Roles.MAHASISWA ,Roles.USER, Roles.PETUGAS_SUPER]),
     filterPengaduanMiddleware.filterPengaduanByRole,
     PengaduanController.getAll
 )
 
 PengaduanRoutes.get("/:id",
     authMiddleware.checkJwt, 
-    authMiddleware.checkRole([Roles.PETUGAS, Roles.USER, Roles.PETUGAS_SUPER]),
+    authMiddleware.checkRole([Roles.PETUGAS,Roles.DOSEN,Roles.MAHASISWA, Roles.USER, Roles.PETUGAS_SUPER]),
      PengaduanController.getById
 )
 
 PengaduanRoutes.post("/",
     authMiddleware.checkJwt, 
-    authMiddleware.checkRole([Roles.USER]), 
+    authMiddleware.checkRole([Roles.USER, Roles.DOSEN, Roles.MAHASISWA]), 
     pengaudanValidation.validatePengaduanDTO, 
     PengaduanController.create
 )

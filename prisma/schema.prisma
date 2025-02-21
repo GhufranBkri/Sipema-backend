@@ -12,6 +12,8 @@ datasource db {
 
 enum Roles {
   USER
+  MAHASISWA
+  DOSEN
   ADMIN
   PETUGAS_SUPER
   PETUGAS

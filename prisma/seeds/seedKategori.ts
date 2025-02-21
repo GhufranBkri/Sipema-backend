@@ -61,4 +61,57 @@ export async function seedKategori(prisma: PrismaClient) {
 
         console.log("Kategori seeded");
     }
+        
+
+}
+
+export async function seedKategoriWBS(prisma: PrismaClient) {
+
+
+
+    const KategoriWBS=await prisma.kategoriWBS.count();
+    if( KategoriWBS===0){
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Korupsi atau Gratifikasi"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Penyalahgunaan Wewenang"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Pelanggaran Etika"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Pencurian atau Penipuan"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Pelanggaran Kesehatan dan Keselamatan Kerja (K3)"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Perlakuan Tidak Adil atau Diskriminasi"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Kerugian Keuangan"
+            }
+        });
+        await prisma.kategoriWBS.create({
+            data:{
+                nama:"Pelanggaran Terhadap Regulasi atau Hukum"
+            }
+        });
+        
+
+    }
 }

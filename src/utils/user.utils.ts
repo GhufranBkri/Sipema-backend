@@ -16,6 +16,10 @@ export function transformRoleToEnumRole(payload: any): Roles {
       return Roles.PETUGAS;
     case "USER":
       return Roles.USER;
+    case "MAHASISWA":
+      return Roles.MAHASISWA;
+    case "DOSEN":
+      return Roles.DOSEN;
     default:
       return Roles.USER;
   }

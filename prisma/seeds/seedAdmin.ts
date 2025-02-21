@@ -6,6 +6,9 @@ export async function seedAdmin(prisma: PrismaClient) {
   // Check existing users for each role
   const countAdmin = await prisma.user.count({ where: { role: Roles.ADMIN } });
   const countUser = await prisma.user.count({ where: { role: Roles.USER } });
+  const countMahasiswa = await prisma.user.count({ where: { role: Roles.MAHASISWA } });
+  const countDosen = await prisma.user.count({ where: { role: Roles.DOSEN } });
+
   const countKepalaPetugasUnit = await prisma.user.count({
     where: { role: Roles.KEPALA_PETUGAS_UNIT },
   });
@@ -32,6 +35,42 @@ export async function seedAdmin(prisma: PrismaClient) {
     });
     console.log("Admin seeded");
   }
+
+  // Dosen seed
+  if (countDosen === 0) {
+    const hashedPassword = await bcrypt.hash("dosen123", 12);
+    await prisma.user.create({
+      data: {
+        id: ulid(),
+        name: "Dosen",
+        no_identitas: "2002",
+        password: hashedPassword,
+        email: "dosen@test.com",
+        role: Roles.DOSEN,
+        program_studi: "Informatika",
+      },
+    });
+    console.log("Dosen seeded");
+  }
+
+  // Mahasiswa seed
+  if (countMahasiswa === 0) {
+    const hashedPassword = await bcrypt.hash("Mahasiswa123", 12);
+    await prisma.user.create({
+      data: {
+        id: ulid(),
+        name: "Dosen",
+        no_identitas: "2003",
+        password: hashedPassword,
+        email: "mahasiswa@test.com",
+        role: Roles.MAHASISWA,
+        program_studi: "Informatika",
+      },
+    });
+    console.log("Dosen seeded");
+  }
+
+  
 
   // User seed
   if (countUser === 0) {
