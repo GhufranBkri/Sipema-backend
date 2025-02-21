@@ -1,9 +1,6 @@
 # Sipema Repositories for Backend  t
 
 # berhasil
-
-# please berhasil
-
 ## Tech Stacks
 
 - Language : TypeScript
