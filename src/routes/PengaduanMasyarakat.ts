@@ -22,6 +22,7 @@ PengaduanMasyarakatRoutes.get("/:id", AuthMiddleware.checkJwt,
 
 
 PengaduanMasyarakatRoutes.post("/",
+    AuthMiddleware.checkJwt,
     PengaduanMasyarakatValidation.validatePengaduanMasyarakatDTO,
     PengaduanMasyarakatController.create
 )
