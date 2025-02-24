@@ -1,11 +1,12 @@
 import { FilteringQueryV2, PagedList } from "$entities/Query";
 import {
+  BadRequestWithMessage,
   INTERNAL_SERVER_ERROR_SERVICE_RESPONSE,
   INVALID_ID_SERVICE_RESPONSE,
   ServiceResponse,
 } from "$entities/Service";
 import { prisma } from "$utils/prisma.utils";
-import { Pengaduan, Roles } from "@prisma/client";
+import { Pengaduan } from "@prisma/client";
 import { PengaduanDTO } from "$entities/Pengaduan";
 import { ErrorHandler } from "$utils/errorHandler";
 import Logger from "$pkg/logger";
@@ -59,68 +60,59 @@ export async function create(
   }
 }
 
+
+
+
 export type GetAllResponse = PagedList<Pengaduan[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
-  filterByRole: FilteringQueryV2,
   user: UserJWTDAO
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
-    // First, build role-based filters
-    const roleFilters = buildFilterQueryLimitOffsetV2(filterByRole);
     
-    // Then build regular filters
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
-    
-    // Combine the where conditions from both filters
-    const combinedWhere = {
-      AND: [
-        roleFilters.where || {},
-        usedFilters.where || {}
-      ]
-    };
-
-    // Use the combined filters with the include options
-    const finalFilters = {
-      ...usedFilters,
-      where: combinedWhere,
-      include: {
-        pelaporId: false,
-        kategori: {
-          select: {
-            nama: true,
-          },
-        },
-        pelapor:
-          user.role === Roles.PETUGAS_SUPER
-            ? {
-                select: {
-                  name: true,
-                  no_identitas: true,
-                  email: true,
-                  role: true,
-                  program_studi: true,
-                },
-              }
-            : false,
-        unit: {
-          select: {
-            nama_unit: true,
-            petugas: {
-              select: {
-                no_identitas: true,
-                name: true,
-              },
-            },
-          },
-        },
+  
+    // petugas universitas
+    usedFilters.include = {
+      pelapor: true,
+      unit: {
+        include: {
+          petugas: true,
+        }
       },
-    };
+      kategori: true 
+    }
+
+    //dosen mahasiswa 
+    if (user.role === 'DOSEN' || user.role === 'MAHASISWA') {
+      usedFilters.where.AND.push({
+        pelaporId: user.no_identitas
+      })
+    }
+
+    if (user.role === 'PETUGAS') {
+      const officerUnit = await prisma.unit.findFirst({
+        where: { 
+          petugas: { 
+            some: { no_identitas: user.no_identitas } 
+          } 
+        },
+      });
+    
+      if (!officerUnit) {
+        return BadRequestWithMessage("You are not assigned to any unit");
+      }
+    
+      usedFilters.where.AND.push({
+        nameUnit: officerUnit.nama_unit  // Menggunakan nameUnit bukan unit
+      })
+    }
+ 
 
     const [PengaduanDTO, totalData] = await Promise.all([
-      prisma.pengaduan.findMany(finalFilters),
+      prisma.pengaduan.findMany(usedFilters),
       prisma.pengaduan.count({
-        where: combinedWhere,
+        where: usedFilters.where,
       }),
     ]);
 
@@ -141,6 +133,26 @@ export async function getAll(
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
+
+export type GetTotalCountResponse = { totalCount: number; totalCountMasyarakat: number } | {};
+export async function getTotalCount(): Promise<ServiceResponse<GetTotalCountResponse>> {
+  try {
+    const [totalCount, totalCountMasyarakat] = await Promise.all([
+      prisma.pengaduan.count(),
+      prisma.pengaduanMasyarakat.count(),
+    ]);
+
+    return {
+      status: true,
+      data: { totalCount, totalCountMasyarakat },
+    };
+  } catch (err) {
+    Logger.error(`PengaduanService.getTotalCount : ${err}`);
+    return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
+  }
+}
+
+
 
 export type GetByIdResponse = Pengaduan | {};
 export async function getById(

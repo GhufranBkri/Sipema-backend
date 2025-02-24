@@ -20,18 +20,27 @@ export async function create(c: Context): Promise<TypedResponse> {
     return response_created(c, serviceResponse.data, "Successfully created new Pengaduan!");
 }
 
-export async function getAll(c: Context): Promise<TypedResponse> {
-    const filterByRole: FilteringQueryV2 = c.get("filters")  
+export async function getAll(c: Context): Promise<TypedResponse> { 
     const filter: FilteringQueryV2 = checkFilteringQueryV2(c); 
     const user: UserJWTDAO = c.get("jwtPayload");
 
-    const serviceResponse = await PengaduanService.getAll(filter, filterByRole, user)
+    const serviceResponse = await PengaduanService.getAll(filter, user)
 
     if (!serviceResponse.status) {
         return handleServiceErrorWithResponse(c, serviceResponse)
     }
 
     return response_success(c, serviceResponse.data, "Successfully fetched all Pengaduan!")
+}
+
+export async function getTotalCount(c: Context): Promise<TypedResponse> {
+    const serviceResponse = await PengaduanService.getTotalCount();
+
+    if (!serviceResponse.status) {
+        return handleServiceErrorWithResponse(c, serviceResponse);
+    }
+
+    return response_success(c, serviceResponse.data, "Successfully fetched total count of Pengaduan!");
 }
 
 export async function getById(c: Context): Promise<TypedResponse> {
