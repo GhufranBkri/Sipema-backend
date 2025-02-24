@@ -57,7 +57,6 @@ model Unit {
   kepalaUnit          User                  @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
   kepalaUnitId        String                @unique
   PengaduanMasyarakat PengaduanMasyarakat[]
-  pengaduanWbs       PelaporanWBS[]
 }
 
 model Kategori {
@@ -69,6 +68,7 @@ model Kategori {
   PengaduanMasyarakat PengaduanMasyarakat[]
 }
 
+// test
 model PelaporanWBS {
   id             String       @id  @default(cuid())
   judul          String
@@ -76,9 +76,7 @@ model PelaporanWBS {
   pihakTerlibat  String
   tanggalKejadian DateTime
   lokasi         String
-  kategoriId     String
-  nameUnit String
-  unit Unit @relation(fields: [nameUnit], references: [nama_unit])
+  kategoriId     String 
   kategori       KategoriWBS  @relation(fields: [kategoriId], references: [id])
   pelaporId      String?
   pelapor        User?      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
