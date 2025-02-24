@@ -40,7 +40,7 @@ export async function filterPengaduanByRole(c: Context, next: Next) {
       break;
 
 
-    case Roles.DOSEN:
+    case Roles.MAHASISWA:
     filters.filters = {
       ...filters.filters,
       pelaporId: noIdentitas,
