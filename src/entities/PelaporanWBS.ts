@@ -3,6 +3,7 @@ export interface PelaporanWBSDTO {
   judul: string;
   deskripsi: string;
   lokasi: string;
+  pihakTerlibat: string;
   kategoriId: string;
   pelaporId: string;
   tanggalKejadian: Date;
