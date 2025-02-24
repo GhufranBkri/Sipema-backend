@@ -3,7 +3,6 @@ import * as PelaporanWBSController from "$controllers/rest/PelaporanWBSControlle
 import * as pengaudanValidation from "$validations/PelaporanWBSValidation";
 import * as authMiddleware from "$middlewares/authMiddleware";
 import { Roles } from "@prisma/client";
-import * as filterPengaduanMiddleware from "$middlewares/filterPengaduanMiddleware";
 
 const PelaporanWBSRoutes = new Hono();
 
@@ -11,7 +10,6 @@ PelaporanWBSRoutes.get(
   "/",
   authMiddleware.checkJwt,
   authMiddleware.checkRole([Roles.PETUGAS, Roles.DOSEN, Roles.PETUGAS_SUPER]),
-  filterPengaduanMiddleware.filterPengaduanByRole,
   PelaporanWBSController.getAll
 );
 

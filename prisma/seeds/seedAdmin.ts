@@ -6,7 +6,9 @@ export async function seedAdmin(prisma: PrismaClient) {
   // Check existing users for each role
   const countAdmin = await prisma.user.count({ where: { role: Roles.ADMIN } });
   const countUser = await prisma.user.count({ where: { role: Roles.USER } });
-  const countMahasiswa = await prisma.user.count({ where: { role: Roles.MAHASISWA } });
+  const countMahasiswa = await prisma.user.count({
+    where: { role: Roles.MAHASISWA },
+  });
   const countDosen = await prisma.user.count({ where: { role: Roles.DOSEN } });
 
   const countKepalaPetugasUnit = await prisma.user.count({
@@ -69,8 +71,6 @@ export async function seedAdmin(prisma: PrismaClient) {
     });
     console.log("Dosen seeded");
   }
-
-  
 
   // User seed
   if (countUser === 0) {

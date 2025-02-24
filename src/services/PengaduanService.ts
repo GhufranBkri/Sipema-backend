@@ -60,54 +60,64 @@ export async function create(
   }
 }
 
-
-
-
 export type GetAllResponse = PagedList<Pengaduan[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
   user: UserJWTDAO
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
-    
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
-  
+
     // petugas universitas
     usedFilters.include = {
       pelapor: true,
       unit: {
         include: {
           petugas: true,
-        }
+        },
       },
-      kategori: true 
-    }
+      kategori: true,
+    };
 
-    //dosen mahasiswa 
-    if (user.role === 'DOSEN' || user.role === 'MAHASISWA') {
+    //dosen mahasiswa
+    if (user.role === "DOSEN" || user.role === "MAHASISWA") {
       usedFilters.where.AND.push({
-        pelaporId: user.no_identitas
-      })
+        pelaporId: user.no_identitas,
+      });
     }
 
-    if (user.role === 'PETUGAS') {
-      const officerUnit = await prisma.unit.findFirst({
-        where: { 
-          petugas: { 
-            some: { no_identitas: user.no_identitas } 
-          } 
+    if (user.role === "KEPALA_PETUGAS_UNIT") {
+      const unit = await prisma.unit.findFirst({
+        where: {
+          kepalaUnitId: user.no_identitas,
         },
       });
-    
+
+      if (!unit) {
+        return BadRequestWithMessage("You are not assigned to any unit");
+      }
+
+      usedFilters.where.AND.push({
+        nameUnit: unit.nama_unit,
+      });
+    }
+    if (user.role === "PETUGAS") {
+      const officerUnit = await prisma.unit.findFirst({
+        where: {
+          petugas: {
+            some: { no_identitas: user.no_identitas },
+          },
+        },
+      });
+
       if (!officerUnit) {
         return BadRequestWithMessage("You are not assigned to any unit");
       }
-    
+
       usedFilters.where.AND.push({
-        nameUnit: officerUnit.nama_unit  // Menggunakan nameUnit bukan unit
-      })
+        nameUnit: officerUnit.nama_unit, // Menggunakan nameUnit bukan unit
+      });
     }
- 
 
     const [PengaduanDTO, totalData] = await Promise.all([
       prisma.pengaduan.findMany(usedFilters),
@@ -134,8 +144,12 @@ export async function getAll(
   }
 }
 
-export type GetTotalCountResponse = { totalCount: number; totalCountMasyarakat: number } | {};
-export async function getTotalCount(): Promise<ServiceResponse<GetTotalCountResponse>> {
+export type GetTotalCountResponse =
+  | { totalCount: number; totalCountMasyarakat: number }
+  | {};
+export async function getTotalCount(): Promise<
+  ServiceResponse<GetTotalCountResponse>
+> {
   try {
     const [totalCount, totalCountMasyarakat] = await Promise.all([
       prisma.pengaduan.count(),
@@ -151,8 +165,6 @@ export async function getTotalCount(): Promise<ServiceResponse<GetTotalCountResp
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
-
-
 
 export type GetByIdResponse = Pengaduan | {};
 export async function getById(
