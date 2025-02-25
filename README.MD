@@ -1,5 +1,6 @@
-# Sipema Repositories for Backend 
+# Sipema Repositories for Backend
 
+# test untuk auto pull
 
 ## Tech Stacks
 
@@ -10,7 +11,7 @@
 - Logging : Winston + Morgan
 
 > [!NOTE]  
->  As stated in Getting Started parts of our notion, don't forget to make sure that you have Node.js >= 16.14.2 and PostgreSQL 
+>  As stated in Getting Started parts of our notion, don't forget to make sure that you have Node.js >= 16.14.2 and PostgreSQL
 
 ## How to use
 
