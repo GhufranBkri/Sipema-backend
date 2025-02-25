@@ -39,4 +39,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            /home/ghufran/script/deploy.sh
+            /home/${{ secrets.SERVER_USER }}/script/deploy.sh
