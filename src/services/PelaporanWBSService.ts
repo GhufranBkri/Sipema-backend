@@ -6,7 +6,7 @@ import {
 } from "$entities/Service";
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
-import { PelaporanWBS, Roles } from "@prisma/client";
+import { PelaporanWBS } from "@prisma/client";
 import { PelaporanWBSDTO } from "$entities/PelaporanWBS";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
@@ -47,26 +47,25 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
     usedFilters.include = {
-      // pelaporId: false,
       kategori: {
         select: {
           nama: true,
         },
       },
-      pelapor:
-        user.role === Roles.PETUGAS_SUPER
-          ? {
-              select: {
-                name: true,
-                no_identitas: true,
-                email: true,
-                role: true,
-                program_studi: true,
-              },
-            }
-          : false,
+      pelapor: {
+        select: {
+          name: {
+            select: {
+              name: true,
+              no_identitas: true,
+              email: true,
+              role: true,
+              program_studi: true,
+            },
+          },
+        },
+      },
     };
-
     const [pelaporanWBS, totalData] = await Promise.all([
       prisma.pelaporanWBS.findMany(usedFilters),
       prisma.pelaporanWBS.count({
