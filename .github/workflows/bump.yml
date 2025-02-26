@@ -1,3 +1,4 @@
+
 name: Check & deploy API documentation
 permissions:
   contents: read
@@ -6,10 +7,11 @@ on:
   push:
     branches:
       - main
+      - master
   pull_request:
     branches:
       - main
-      
+      - master
 jobs:
   deploy-doc:
     if: ${{ github.event_name == 'push' }}
@@ -41,3 +43,5 @@ jobs:
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
+
+    
