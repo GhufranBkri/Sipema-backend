@@ -29,9 +29,10 @@ router.route("/pengaduan", RoutesRegistry.PengaduanMasyarakatRoutes);
 router.route("/upload", RoutesRegistry.UploadRoutes);
 router.route("/kategoriWbs", RoutesRegistry.KategoriWBSRoutes);
 router.route("/PelaporanWbs", RoutesRegistry.PelaporanWBSRoutes);
+router.route("/PetugasWbs", RoutesRegistry.PetugasWBSRoutes);
 
 router.get("/", (c: Context) => {
-  return response_success(c, "main routes!");
+  return c.json({ message: "What are u doin nigga?" });
 });
 
 router.get("/robots.txt", (c: Context) => {

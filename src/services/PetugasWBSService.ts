@@ -6,75 +6,44 @@ import {
 } from "$entities/Service";
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
-import { PelaporanWBS } from "@prisma/client";
-import { PelaporanWBSDTO } from "$entities/PelaporanWBS";
+import { PetugasWBS } from "@prisma/client";
+import { PetugasWBSDTO } from "$entities/PetugasWBS";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
 
-export type CreateResponse = PelaporanWBS | {};
+export type CreateResponse = PetugasWBS | {};
 export async function create(
-  user: UserJWTDAO,
-  data: PelaporanWBSDTO
+  data: PetugasWBSDTO,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<CreateResponse>> {
   try {
-    // Format tanggalKejadian to yyyy-mm-dd if it exists
-    if (data.tanggalKejadian) {
-      data.tanggalKejadian = new Date(data.tanggalKejadian);
-    }
-
-    const pelaporanWBS = await prisma.pelaporanWBS.create({
+    const petugasWBS = await prisma.petugasWBS.create({
       data: {
         ...data,
-        pelaporId: user.no_identitas,
+        kepalaWBSId: user.no_identitas,
       },
     });
 
     return {
       status: true,
-      data: pelaporanWBS,
+      data: petugasWBS,
     };
   } catch (err) {
-    Logger.error(`PelaporanWBSService.create : ${err}`);
+    Logger.error(`PetugasWBSService.create : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
 
-export type GetAllResponse = PagedList<PelaporanWBS[]> | {};
+export type GetAllResponse = PagedList<PetugasWBS[]> | {};
 export async function getAll(
-  filters: FilteringQueryV2,
-  user: UserJWTDAO
+  filters: FilteringQueryV2
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
-    usedFilters.include = {
-      kategori: {
-        select: {
-          nama: true,
-        },
-      },
-      pelapor: {
-        select: {
-          name: {
-            select: {
-              name: true,
-              no_identitas: true,
-              email: true,
-              role: true,
-              program_studi: true,
-            },
-          },
-        },
-      },
-    };
 
-    // if (user.role ==== "Dosen") {
-    //   usedFilters.where.AND.push({
-
-    //   })
-    // }
-    const [pelaporanWBS, totalData] = await Promise.all([
-      prisma.pelaporanWBS.findMany(usedFilters),
-      prisma.pelaporanWBS.count({
+    const [petugasWBS, totalData] = await Promise.all([
+      prisma.petugasWBS.findMany(usedFilters),
+      prisma.petugasWBS.count({
         where: usedFilters.where,
       }),
     ]);
@@ -86,55 +55,55 @@ export async function getAll(
     return {
       status: true,
       data: {
-        entries: pelaporanWBS,
+        entries: petugasWBS,
         totalData,
         totalPage,
       },
     };
   } catch (err) {
-    Logger.error(`PelaporanWBSService.getAll : ${err} `);
+    Logger.error(`PetugasWBSService.getAll : ${err} `);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
 
-export type GetByIdResponse = PelaporanWBS | {};
+export type GetByIdResponse = PetugasWBS | {};
 export async function getById(
   id: string
 ): Promise<ServiceResponse<GetByIdResponse>> {
   try {
-    let pelaporanWBS = await prisma.pelaporanWBS.findUnique({
+    let petugasWBS = await prisma.petugasWBS.findUnique({
       where: {
         id,
       },
     });
 
-    if (!pelaporanWBS) return INVALID_ID_SERVICE_RESPONSE;
+    if (!petugasWBS) return INVALID_ID_SERVICE_RESPONSE;
 
     return {
       status: true,
-      data: pelaporanWBS,
+      data: petugasWBS,
     };
   } catch (err) {
-    Logger.error(`PelaporanWBSService.getById : ${err}`);
+    Logger.error(`PetugasWBSService.getById : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
 
-export type UpdateResponse = PelaporanWBS | {};
+export type UpdateResponse = PetugasWBS | {};
 export async function update(
   id: string,
-  data: PelaporanWBSDTO
+  data: PetugasWBSDTO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
-    let pelaporanWBS = await prisma.pelaporanWBS.findUnique({
+    let petugasWBS = await prisma.petugasWBS.findUnique({
       where: {
         id,
       },
     });
 
-    if (!pelaporanWBS) return INVALID_ID_SERVICE_RESPONSE;
+    if (!petugasWBS) return INVALID_ID_SERVICE_RESPONSE;
 
-    pelaporanWBS = await prisma.pelaporanWBS.update({
+    petugasWBS = await prisma.petugasWBS.update({
       where: {
         id,
       },
@@ -143,10 +112,10 @@ export async function update(
 
     return {
       status: true,
-      data: pelaporanWBS,
+      data: petugasWBS,
     };
   } catch (err) {
-    Logger.error(`PelaporanWBSService.update : ${err}`);
+    Logger.error(`PetugasWBSService.update : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
@@ -156,7 +125,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     const idArray: string[] = JSON.parse(ids);
 
     idArray.forEach(async (id) => {
-      await prisma.pelaporanWBS.delete({
+      await prisma.petugasWBS.delete({
         where: {
           id,
         },
@@ -168,7 +137,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
       data: {},
     };
   } catch (err) {
-    Logger.error(`PelaporanWBSService.deleteByIds : ${err}`);
+    Logger.error(`PetugasWBSService.deleteByIds : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }

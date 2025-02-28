@@ -16,6 +16,8 @@ enum Roles {
   DOSEN
   ADMIN
   PETUGAS_SUPER
+  PETUGAS_WBS
+  KEPALA_WBS
   PETUGAS
   KEPALA_PETUGAS_UNIT
 }
@@ -47,6 +49,8 @@ model User {
   unit_petugas  Unit?     @relation("petugas", fields: [unitId], references: [id])
   unitId        String?
   unit_kepala   Unit?     @relation("kepalaUnit")
+  petugas_wbs   PetugasWBS[]  @relation("petugasWBS")    
+  kepala_wbs    PetugasWBS? @relation("kepalaWBS")    
 }
 
 model Unit {
@@ -68,6 +72,16 @@ model Kategori {
   PengaduanMasyarakat PengaduanMasyarakat[]
 }
 
+model PetugasWBS {
+  id            String    @id @default(cuid())
+  kepalaWBS     User      @relation("kepalaWBS", fields: [kepalaWBSId], references: [no_identitas])
+  kepalaWBSId   String    @unique  // Tetap unique karena hanya ada 1 kepala
+  petugas       User      @relation("petugasWBS", fields: [petugasId], references: [no_identitas])
+  petugasId     String    // Tidak unique agar bisa ada beberapa petugas
+  isActive      Boolean   @default(true)  // Tambahan untuk status aktif petugas
+  pelaporanWBS  PelaporanWBS[]
+}
+
 // test
 model PelaporanWBS {
   id             String       @id  @default(cuid())
@@ -77,8 +91,11 @@ model PelaporanWBS {
   tanggalKejadian DateTime
   lokasi         String
   kategoriId     String 
+  unit          String
   kategori       KategoriWBS  @relation(fields: [kategoriId], references: [id])
   pelaporId      String?
+  petugasWBS    PetugasWBS? @relation(fields: [petugasWBSId], references: [id])
+  petugasWBSId  String?
   pelapor        User?      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   status         Status     @default(PENDING)
   createdAt      DateTime   @default(now())

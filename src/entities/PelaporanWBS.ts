@@ -7,4 +7,6 @@ export interface PelaporanWBSDTO {
   kategoriId: string;
   pelaporId: string;
   tanggalKejadian: Date;
+  unit: string;
+  petugasWBSId?: string;
 }

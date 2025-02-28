@@ -14,6 +14,10 @@ export function transformRoleToEnumRole(payload: any): Roles {
       return Roles.KEPALA_PETUGAS_UNIT;
     case "PETUGAS":
       return Roles.PETUGAS;
+    case "PETUGAS_WBS":
+      return Roles.PETUGAS_WBS;
+    case "KEPALA_WBS":
+      return Roles.KEPALA_WBS;
     case "USER":
       return Roles.USER;
     case "MAHASISWA":

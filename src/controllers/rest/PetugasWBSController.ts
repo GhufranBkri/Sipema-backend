@@ -1,20 +1,20 @@
 import { Context, TypedResponse } from "hono";
-import * as PengaduanService from "$services/PengaduanService";
+import * as PetugasWBSService from "$services/PetugasWBSService";
 import {
   handleServiceErrorWithResponse,
   response_created,
   response_success,
 } from "$utils/response.utils";
-import { PengaduanDTO } from "$entities/Pengaduan";
+import { PetugasWBSDTO } from "$entities/PetugasWBS";
 import { FilteringQueryV2 } from "$entities/Query";
 import { checkFilteringQueryV2 } from "$controllers/helpers/CheckFilteringQuery";
 import { UserJWTDAO } from "$entities/User";
 
 export async function create(c: Context): Promise<TypedResponse> {
-  const data: PengaduanDTO = await c.req.json();
+  const data: PetugasWBSDTO = await c.req.json();
   const user: UserJWTDAO = c.get("jwtPayload");
 
-  const serviceResponse = await PengaduanService.create(data, user);
+  const serviceResponse = await PetugasWBSService.create(data, user);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
@@ -23,29 +23,14 @@ export async function create(c: Context): Promise<TypedResponse> {
   return response_created(
     c,
     serviceResponse.data,
-    "Successfully created new Pengaduan!"
+    "Successfully created new PetugasWBS!"
   );
 }
 
 export async function getAll(c: Context): Promise<TypedResponse> {
-  const filter: FilteringQueryV2 = checkFilteringQueryV2(c);
-  const user: UserJWTDAO = c.get("jwtPayload");
+  const filters: FilteringQueryV2 = checkFilteringQueryV2(c);
 
-  const serviceResponse = await PengaduanService.getAll(filter, user);
-
-  if (!serviceResponse.status) {
-    return handleServiceErrorWithResponse(c, serviceResponse);
-  }
-
-  return response_success(
-    c,
-    serviceResponse.data,
-    "Successfully fetched all Pengaduan!"
-  );
-}
-
-export async function getTotalCount(c: Context): Promise<TypedResponse> {
-  const serviceResponse = await PengaduanService.getTotalCount();
+  const serviceResponse = await PetugasWBSService.getAll(filters);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
@@ -54,14 +39,14 @@ export async function getTotalCount(c: Context): Promise<TypedResponse> {
   return response_success(
     c,
     serviceResponse.data,
-    "Successfully fetched total count of Pengaduan!"
+    "Successfully fetched all PetugasWBS!"
   );
 }
 
 export async function getById(c: Context): Promise<TypedResponse> {
   const id = c.req.param("id");
 
-  const serviceResponse = await PengaduanService.getById(id);
+  const serviceResponse = await PetugasWBSService.getById(id);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
@@ -70,15 +55,15 @@ export async function getById(c: Context): Promise<TypedResponse> {
   return response_success(
     c,
     serviceResponse.data,
-    "Successfully fetched Pengaduan by id!"
+    "Successfully fetched PetugasWBS by id!"
   );
 }
 
 export async function update(c: Context): Promise<TypedResponse> {
-  const data: PengaduanDTO = await c.req.json();
+  const data: PetugasWBSDTO = await c.req.json();
   const id = c.req.param("id");
 
-  const serviceResponse = await PengaduanService.update(id, data);
+  const serviceResponse = await PetugasWBSService.update(id, data);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
@@ -87,14 +72,14 @@ export async function update(c: Context): Promise<TypedResponse> {
   return response_success(
     c,
     serviceResponse.data,
-    "Successfully updated Pengaduan!"
+    "Successfully updated PetugasWBS!"
   );
 }
 
 export async function deleteByIds(c: Context): Promise<TypedResponse> {
   const ids = c.req.query("ids") as string;
 
-  const serviceResponse = await PengaduanService.deleteByIds(ids);
+  const serviceResponse = await PetugasWBSService.deleteByIds(ids);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
@@ -103,6 +88,6 @@ export async function deleteByIds(c: Context): Promise<TypedResponse> {
   return response_success(
     c,
     serviceResponse.data,
-    "Successfully deleted Pengaduan!"
+    "Successfully deleted PetugasWBS!"
   );
 }
