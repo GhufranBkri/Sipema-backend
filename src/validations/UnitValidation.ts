@@ -8,6 +8,7 @@ import {
 } from "./helper";
 import { AddPetugasDTO, UnitCreateDTO, UnitUpdateDTO } from "$entities/Unit";
 import { prisma } from "$utils/prisma.utils";
+import { UserJWTDAO } from "$entities/User";
 
 export async function validateUnitCreateDTO(c: Context, next: Next) {
   const data: UnitCreateDTO = await c.req.json();
@@ -28,7 +29,9 @@ export async function validateUnitCreateDTO(c: Context, next: Next) {
     });
 
     if (!existingUser) {
-      invalidFields.push(generateErrorStructure("kepalaUnit", "user not found"));
+      invalidFields.push(
+        generateErrorStructure("kepalaUnit", "user not found")
+      );
     } else if (existingUser.role !== "KEPALA_PETUGAS_UNIT") {
       invalidFields.push(
         generateErrorStructure(
@@ -38,7 +41,7 @@ export async function validateUnitCreateDTO(c: Context, next: Next) {
       );
     }
   }
-  
+
   // Check if unit name already exists
   const existingUnit = await prisma.unit.findUnique({
     where: { nama_unit: data.nama_unit },
@@ -99,12 +102,13 @@ export async function validateUnitUpdateDTO(c: Context, next: Next) {
 export async function validateAddPetugasDTO(c: Context, next: Next) {
   const data: AddPetugasDTO = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
-
-  const nama_unit = c.req.param("nama_unit");
-  data.nama_unit = nama_unit;
+  const user: UserJWTDAO = c.get("jwtPayload");
 
   // Basic validations
-  if (!data.nama_unit) {
+  const unit = await prisma.unit.findUnique({
+    where: { id: user.unitId },
+  });
+  if (!unit?.nama_unit) {
     invalidFields.push(generateErrorStructure("nama_unit", "cannot be empty"));
   }
 
@@ -145,7 +149,7 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
 
       // Check if any petugas is already in this unit
       const currentUnit = await prisma.unit.findUnique({
-        where: { nama_unit: data.nama_unit },
+        where: { nama_unit: unit?.nama_unit },
         include: { petugas: true },
       });
 
@@ -167,7 +171,7 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
       // Check if petugas is in another unit
       const petugasInOtherUnit = await prisma.unit.findFirst({
         where: {
-          nama_unit: { not: data.nama_unit },
+          nama_unit: { not: unit?.nama_unit },
           petugas: { some: { no_identitas: { in: data.petugasIds } } },
         },
       });
@@ -194,10 +198,9 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
   const invalidFields: ErrorStructure[] = [];
 
   const nama_unit = c.req.param("nama_unit");
-  data.nama_unit = nama_unit;
 
   // Basic validations
-  if (!data.nama_unit) {
+  if (!nama_unit) {
     invalidFields.push(generateErrorStructure("nama_unit", "cannot be empty"));
   }
 
@@ -213,7 +216,7 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
   // Check if petugas exists in the specified unit
   const unit = await prisma.unit.findFirst({
     where: {
-      nama_unit: data.nama_unit,
+      nama_unit: nama_unit,
       petugas: {
         some: {
           no_identitas: {

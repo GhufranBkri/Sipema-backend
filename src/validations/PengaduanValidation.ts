@@ -99,15 +99,6 @@ export async function validateUpdatePengaduanDTO(c: Context, next: Next) {
     include: { pelapor: true },
   });
 
-  // if (pengaduan?.pelaporId !== user.no_identitas) {
-  //   invalidFields.push(
-  //     generateErrorStructure(
-  //       "pelaporId",
-  //       "reporter ID does not match authenticated user"
-  //     )
-  //   );
-  // }
-
   if (!pengaduan) {
     invalidFields.push(generateErrorStructure("id", "complaint not found"));
   } else if (

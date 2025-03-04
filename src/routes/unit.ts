@@ -18,7 +18,7 @@ unitRoutes.post(
   unitController.create
 );
 unitRoutes.post(
-  "/:nama_unit/petugas",
+  "/petugas",
   AuthMiddleware.checkJwt,
 
   AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),

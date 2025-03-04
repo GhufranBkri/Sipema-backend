@@ -16,6 +16,7 @@ import {
   AddPetugasDTO,
 } from "$entities/Unit";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
+import { UserJWTDAO } from "$entities/User";
 
 export type CreateResponse = Unit | {};
 export async function create(
@@ -50,6 +51,18 @@ export async function create(
       },
     });
 
+    if (data.kepalaUnit) {
+      await prisma.user.update({
+        where: {
+          no_identitas: data.kepalaUnit,
+        },
+
+        data: {
+          unitId: unit.id,
+        },
+      });
+    }
+
     return {
       status: true,
       data: unit,
@@ -62,15 +75,15 @@ export async function create(
 
 export type AddPetugasResponse = Unit | {};
 export async function addPetugas(
-  data: AddPetugasDTO
+  data: AddPetugasDTO,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<AddPetugasResponse>> {
   try {
     // Validate input
-    if (
-      !data.nama_unit ||
-      !Array.isArray(data.petugasIds) ||
-      data.petugasIds.length === 0
-    ) {
+    let NameUnit = await prisma.unit.findUnique({
+      where: { id: user.unitId },
+    });
+    if (!Array.isArray(data.petugasIds) || data.petugasIds.length === 0) {
       return BadRequestWithMessage("Invalid input data");
     }
 
@@ -90,7 +103,7 @@ export async function addPetugas(
     // Use transaction to ensure data consistency
     const updatedUnit = await prisma.$transaction(async (tx) => {
       const unit = await tx.unit.findUnique({
-        where: { nama_unit: data.nama_unit },
+        where: { nama_unit: NameUnit?.nama_unit },
       });
 
       if (!unit) {
@@ -98,7 +111,7 @@ export async function addPetugas(
       }
 
       return tx.unit.update({
-        where: { nama_unit: data.nama_unit },
+        where: { nama_unit: NameUnit?.nama_unit },
         data: {
           petugas: {
             connect: data.petugasIds.map((id) => ({ no_identitas: id })),
@@ -274,19 +287,21 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    await Promise.all(idArray.map(async (nama) => {
-      await prisma.pengaduan.deleteMany({
-        where: {
-          nameUnit: nama,
-        },
-      });
+    await Promise.all(
+      idArray.map(async (nama) => {
+        await prisma.pengaduan.deleteMany({
+          where: {
+            nameUnit: nama,
+          },
+        });
 
-      await prisma.pengaduanMasyarakat.deleteMany({
-        where: {
-          nameUnit: nama,
-        }
+        await prisma.pengaduanMasyarakat.deleteMany({
+          where: {
+            nameUnit: nama,
+          },
+        });
       })
-    }))
+    );
     idArray.forEach(async (nama_unit) => {
       await prisma.unit.delete({
         where: {

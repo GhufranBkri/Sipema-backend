@@ -7,6 +7,7 @@ import {
 } from "$utils/response.utils";
 import { UnitDTO, UnitCreateDTO, AddPetugasDTO } from "$entities/Unit";
 import { FilteringQueryV2 } from "$entities/Query";
+import { UserJWTDAO } from "$entities/User";
 import { checkFilteringQueryV2 } from "$controllers/helpers/CheckFilteringQuery";
 
 export async function create(c: Context): Promise<TypedResponse> {
@@ -27,10 +28,9 @@ export async function create(c: Context): Promise<TypedResponse> {
 
 export async function addPetugas(c: Context): Promise<TypedResponse> {
   const data: AddPetugasDTO = await c.req.json();
-  const nama_unit = c.req.param("nama_unit");
-  data.nama_unit = nama_unit;
+  const user: UserJWTDAO = c.get("jwtPayload");
 
-  const serviceResponse = await unitService.addPetugas(data);
+  const serviceResponse = await unitService.addPetugas(data, user);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);
