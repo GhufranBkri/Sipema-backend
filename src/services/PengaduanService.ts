@@ -192,7 +192,8 @@ export async function getById(
 export type UpdateResponse = Pengaduan | {};
 export async function update(
   id: string,
-  data: PengaduanDTO
+  data: PengaduanDTO,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
     let Pengaduan = await prisma.pengaduan.findUnique({
@@ -200,6 +201,18 @@ export async function update(
         id,
       },
     });
+
+    if (user.role === "DOSEN" || user.role === "MAHASISWA") {
+      const pengaduan = await prisma.pengaduan.findUnique({
+        where: { id },
+      });
+
+      if (pengaduan?.status !== "PENDING") {
+        return BadRequestWithMessage(
+          "Your report cannot be modified because it has been received by the reporting officer"
+        );
+      }
+    }
 
     if (!Pengaduan) return INVALID_ID_SERVICE_RESPONSE;
 

@@ -46,32 +46,29 @@ export async function getAll(
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
+
+    // petugas universitas
     usedFilters.include = {
-      kategori: {
-        select: {
-          nama: true,
-        },
-      },
-      pelapor: {
-        select: {
-          name: {
-            select: {
-              name: true,
-              no_identitas: true,
-              email: true,
-              role: true,
-              program_studi: true,
-            },
-          },
-        },
-      },
+      pelapor: true,
+      kategori: true,
     };
 
-    // if (user.role ==== "Dosen") {
-    //   usedFilters.where.AND.push({
+    // dosen or pelapor
+    if (user.role === "DOSEN") {
+      usedFilters.where.AND.push({
+        pelaporId: user.no_identitas,
+      });
+    }
 
-    //   })
-    // }
+    // petugasWBS
+    if (user.role === "PETUGAS_WBS" || user.role === "KEPALA_WBS") {
+      usedFilters.include = {
+        pelapor: false,
+        pelaporId: false,
+        kategori: true,
+      };
+    }
+
     const [pelaporanWBS, totalData] = await Promise.all([
       prisma.pelaporanWBS.findMany(usedFilters),
       prisma.pelaporanWBS.count({

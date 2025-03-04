@@ -2,7 +2,7 @@ import { Roles } from "@prisma/client";
 
 export function transformRoleToEnumRole(payload: any): Roles {
   if (!payload || typeof payload.role !== "string") {
-    return Roles.USER; // Default fallback
+    return Roles.USER;
   }
 
   switch (payload.role) {

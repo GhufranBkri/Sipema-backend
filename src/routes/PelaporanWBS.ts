@@ -8,7 +8,12 @@ const PelaporanWBSRoutes = new Hono();
 PelaporanWBSRoutes.get(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole(["PETUGAS_WBS", "KEPALA_WBS", "PETUGAS_SUPER"]),
+  authMiddleware.checkRole([
+    "PETUGAS_WBS",
+    "KEPALA_WBS",
+    "PETUGAS_SUPER",
+    "DOSEN",
+  ]),
   PelaporanWBSController.getAll
 );
 

@@ -74,7 +74,7 @@ model Kategori {
 
 model PetugasWBS {
   id            String    @id @default(cuid())
-  kepalaWBS     User      @relation("kepalaWBS", fields: [kepalaWBSId], references: [no_identitas])
+  kepalaWnBS     User      @relation("kepalaWBS", fields: [kepalaWBSId], references: [no_identitas])
   kepalaWBSId   String    @unique  // Tetap unique karena hanya ada 1 kepala
   petugas       User      @relation("petugasWBS", fields: [petugasId], references: [no_identitas])
   petugasId     String    // Tidak unique agar bisa ada beberapa petugas

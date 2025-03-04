@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import * as PengaduanController from "$controllers/rest/PengaduanController";
 import * as authMiddleware from "$middlewares/authMiddleware";
 import * as pengaudanValidation from "$validations/PengaduanValidation";
-import { Roles } from "@prisma/client";
 
 const PengaduanRoutes = new Hono();
 
@@ -12,12 +11,12 @@ PengaduanRoutes.get(
   "/",
   authMiddleware.checkJwt,
   authMiddleware.checkRole([
-    Roles.PETUGAS,
-    Roles.DOSEN,
-    Roles.KEPALA_PETUGAS_UNIT,
-    Roles.MAHASISWA,
-    Roles.USER,
-    Roles.PETUGAS_SUPER,
+    "PETUGAS",
+    "PETUGAS_SUPER",
+    "KEPALA_PETUGAS_UNIT",
+    "DOSEN",
+    "USER",
+    "MAHASISWA",
   ]),
   PengaduanController.getAll
 );
@@ -26,12 +25,12 @@ PengaduanRoutes.get(
   "/:id",
   authMiddleware.checkJwt,
   authMiddleware.checkRole([
-    Roles.PETUGAS,
-    Roles.DOSEN,
-    Roles.MAHASISWA,
-    Roles.USER,
-    Roles.PETUGAS_SUPER,
-    Roles.KEPALA_PETUGAS_UNIT,
+    "PETUGAS",
+    "PETUGAS_SUPER",
+    "KEPALA_PETUGAS_UNIT",
+    "DOSEN",
+    "USER",
+    "MAHASISWA",
   ]),
   PengaduanController.getById
 );
@@ -39,7 +38,7 @@ PengaduanRoutes.get(
 PengaduanRoutes.post(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([Roles.USER, Roles.DOSEN, Roles.MAHASISWA]),
+  authMiddleware.checkRole(["DOSEN", "USER", "MAHASISWA"]),
   pengaudanValidation.validatePengaduanDTO,
   PengaduanController.create
 );
@@ -47,14 +46,29 @@ PengaduanRoutes.post(
 PengaduanRoutes.put(
   "/:id",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([Roles.PETUGAS, Roles.PETUGAS_SUPER]),
+  authMiddleware.checkRole([
+    "PETUGAS",
+    "PETUGAS_SUPER",
+    "KEPALA_PETUGAS_UNIT",
+    "DOSEN",
+    "USER",
+    "MAHASISWA",
+  ]),
+  pengaudanValidation.validateUpdatePengaduanDTO,
   PengaduanController.update
 );
 
 PengaduanRoutes.delete(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([Roles.PETUGAS, Roles.PETUGAS_SUPER]),
+  authMiddleware.checkRole([
+    "PETUGAS",
+    "PETUGAS_SUPER",
+    "KEPALA_PETUGAS_UNIT",
+    "DOSEN",
+    "USER",
+    "MAHASISWA",
+  ]),
   PengaduanController.deleteByIds
 );
 
