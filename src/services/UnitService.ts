@@ -181,26 +181,13 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
+    usedFilters.include = {
+      kepalaUnit: true,
+      petugas: true,
+    };
+
     const [Unit, totalData] = await Promise.all([
-      prisma.unit.findMany({
-        ...usedFilters,
-        include: {
-          petugas: {
-            select: {
-              no_identitas: true,
-              name: true,
-            },
-          },
-          pengaduan: {
-            select: {
-              id: true,
-              judul: true,
-              deskripsi: true,
-              status: true,
-            },
-          },
-        },
-      }),
+      prisma.unit.findMany(usedFilters),
       prisma.unit.count({
         where: usedFilters.where,
       }),
