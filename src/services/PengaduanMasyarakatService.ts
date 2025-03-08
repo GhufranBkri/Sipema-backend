@@ -44,7 +44,6 @@ export async function create(
 export type GetAllResponse = PagedList<PengaduanMasyarakat[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
-  filterByRole: FilteringQueryV2,
   user: UserJWTDAO
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
@@ -52,7 +51,6 @@ export async function getAll(
 
     // petugas universiatas can only see pengaduan masyarakat
     usedFilters.include = {
-      pelapor: true,
       unit: {
         include: {
           petugas: true,

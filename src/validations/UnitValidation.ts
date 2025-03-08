@@ -108,6 +108,10 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
   const unit = await prisma.unit.findUnique({
     where: { id: user.unitId },
   });
+  if (!unit?.id) {
+    invalidFields.push(generateErrorStructure("unit", "notfound"));
+  }
+
   if (!unit?.nama_unit) {
     invalidFields.push(generateErrorStructure("nama_unit", "cannot be empty"));
   }
