@@ -38,6 +38,7 @@ model User {
   name          String
   password      String
   program_studi String?
+  no_telphone   String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   role          Roles

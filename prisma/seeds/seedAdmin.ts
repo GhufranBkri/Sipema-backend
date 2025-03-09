@@ -20,7 +20,9 @@ export async function seedAdmin(prisma: PrismaClient) {
   const countPetugas = await prisma.user.count({
     where: { role: Roles.PETUGAS },
   });
-
+  const countKepalaWBS = await prisma.user.count({
+    where: { role: Roles.KEPALA_WBS },
+  });
   // Admin seed
   if (countAdmin === 0) {
     const hashedPassword = await bcrypt.hash("admin123", 12);
@@ -53,6 +55,23 @@ export async function seedAdmin(prisma: PrismaClient) {
       },
     });
     console.log("Dosen seeded");
+  }
+
+  // Kepala WBS seed
+  if (countKepalaWBS === 0) {
+    const hashedPassword = await bcrypt.hash("kepala123", 12);
+    await prisma.user.create({
+      data: {
+        id: ulid(),
+        name: "Kepala WBS",
+        no_identitas: "5002",
+        password: hashedPassword,
+        email: "kepalaWBS@test.com",
+        role: Roles.KEPALA_WBS,
+        program_studi: "KEPALA",
+      },
+    });
+    console.log("Kepala WBS seeded");
   }
 
   // Mahasiswa seed
