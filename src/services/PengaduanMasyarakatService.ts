@@ -59,7 +59,7 @@ export async function getAll(
       kategori: true,
     };
 
-    if (user.role === "PETUGAS") {
+    if (user.role === "PETUGAS" || user.role === "KEPALA_PETUGAS_UNIT") {
       const officerUnit = await prisma.unit.findFirst({
         where: {
           petugas: {

@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import * as PengaduanMasyarakatController from "$controllers/rest/PengaduanMasyarakatController";
 import * as PengaduanMasyarakatValidation from "$validations/PengaduanMasyarakatValidation";
 import * as AuthMiddleware from "$middlewares/authMiddleware";
-import * as filterPengaduanMiddleware from "$middlewares/filterPengaduanMiddleware";
 import { Roles } from "@prisma/client";
 const PengaduanMasyarakatRoutes = new Hono();
 
@@ -14,7 +13,6 @@ PengaduanMasyarakatRoutes.get(
     Roles.PETUGAS_SUPER,
     Roles.PETUGAS,
   ]),
-  filterPengaduanMiddleware.filterPengaduanByRole,
   PengaduanMasyarakatController.getAll
 );
 
