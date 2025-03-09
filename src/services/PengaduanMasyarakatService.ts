@@ -128,7 +128,8 @@ export async function getById(
 export type UpdateResponse = PengaduanMasyarakat | {};
 export async function update(
   id: string,
-  data: PengaduanMasyarakatDTO
+  data: PengaduanMasyarakatDTO,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
     let pengaduanMasyarakat = await prisma.pengaduanMasyarakat.findUnique({
@@ -140,7 +141,10 @@ export async function update(
     // Update only allowed fields
     pengaduanMasyarakat = await prisma.pengaduanMasyarakat.update({
       where: { id },
-      data,
+      data: {
+        ...data,
+        approvedBy: user.no_identitas,
+      },
     });
 
     // Send WhatsApp notification

@@ -120,7 +120,8 @@ export async function getById(
 export type UpdateResponse = PelaporanWBS | {};
 export async function update(
   id: string,
-  data: PelaporanWBSDTO
+  data: PelaporanWBSDTO,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
     let pelaporanWBS = await prisma.pelaporanWBS.findUnique({
@@ -131,12 +132,30 @@ export async function update(
 
     if (!pelaporanWBS) return INVALID_ID_SERVICE_RESPONSE;
 
-    pelaporanWBS = await prisma.pelaporanWBS.update({
-      where: {
-        id,
-      },
-      data,
-    });
+    if (
+      user.role === "PETUGAS_WBS" ||
+      user.role === "KEPALA_WBS" ||
+      user.role === "PETUGAS_SUPER"
+    ) {
+      pelaporanWBS = await prisma.pelaporanWBS.update({
+        where: {
+          id,
+        },
+        data: {
+          ...data,
+          approvedBy: user.no_identitas,
+        },
+      });
+    }
+
+    {
+      pelaporanWBS = await prisma.pelaporanWBS.update({
+        where: {
+          id,
+        },
+        data,
+      });
+    }
 
     return {
       status: true,
