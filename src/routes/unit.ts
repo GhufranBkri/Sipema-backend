@@ -6,7 +6,7 @@ import { Roles } from "@prisma/client";
 
 const unitRoutes = new Hono();
 
-unitRoutes.get("/", unitController.getAll);
+unitRoutes.get("/", AuthMiddleware.decodeJwt, unitController.getAll);
 
 unitRoutes.get("/:id", unitController.getById);
 
@@ -20,7 +20,6 @@ unitRoutes.post(
 unitRoutes.post(
   "/petugas",
   AuthMiddleware.checkJwt,
-
   AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),
   unitValidation.validateAddPetugasDTO,
   unitController.addPetugas

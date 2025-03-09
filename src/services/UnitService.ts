@@ -176,15 +176,21 @@ export async function deletePetugasByIds(
 
 export type GetAllResponse = PagedList<Unit[]> | {};
 export async function getAll(
-  filters: FilteringQueryV2
+  filters: FilteringQueryV2,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
     usedFilters.include = {
-      kepalaUnit: true,
-      petugas: true,
+      kepalaUnitId: false,
     };
+    if (user?.role === "ADMIN") {
+      usedFilters.include = {
+        kepalaUnit: true,
+        petugas: true,
+      };
+    }
 
     const [Unit, totalData] = await Promise.all([
       prisma.unit.findMany(usedFilters),

@@ -26,6 +26,23 @@ export async function checkJwt(c: Context, next: Next) {
   }
 }
 
+export async function decodeJwt(c: Context, next: Next) {
+  const token = c.req.header("Authorization")?.split(" ")[1];
+  const JWT_SECRET = process.env.JWT_SECRET ?? "";
+
+  try {
+    if (token) {
+      const decodedValue = jwt.verify(token, JWT_SECRET);
+      c.set("jwtPayload", decodedValue);
+      return await next();
+    }
+    return await next();
+  } catch (err) {
+    console.log("JWT Decode error:", err);
+    return await next();
+  }
+}
+
 export function checkRole(roles: Roles[]) {
   return async (c: Context, next: Next) => {
     const role = transformRoleToEnumRole(c.get("jwtPayload"));
