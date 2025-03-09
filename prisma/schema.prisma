@@ -99,6 +99,7 @@ model PelaporanWBS {
   petugasWBSId  String?
   pelapor        User?      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   status         Status     @default(PENDING)
+  approvedBy    String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   response       String?
@@ -125,6 +126,7 @@ model PengaduanMasyarakat {
   updatedAt     DateTime @updatedAt
   nama          String
   filePendukung String?
+  approvedBy    String?
   no_telphone   String
   filePetugas   String?
   harapan_pelapor String?
@@ -143,7 +145,8 @@ model Pengaduan {
   kategori      Kategori @relation(fields: [kategoriId], references: [id])
   pelapor       User     @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   unit          Unit     @relation(fields: [nameUnit], references: [nama_unit])
-  harapan_pelapor String?
+  approvedBy    String?
+  harapan_pelapor String? 
   filePendukung String?
   response      String?
   filePetugas   String?

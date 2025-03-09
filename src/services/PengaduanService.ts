@@ -192,7 +192,8 @@ export async function getById(
 export type UpdateResponse = Pengaduan | {};
 export async function update(
   id: string,
-  data: PengaduanDTO
+  data: PengaduanDTO,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
     let Pengaduan = await prisma.pengaduan.findUnique({
@@ -202,6 +203,22 @@ export async function update(
     });
 
     if (!Pengaduan) return INVALID_ID_SERVICE_RESPONSE;
+
+    if (
+      user.role === "PETUGAS" ||
+      user.role === "KEPALA_PETUGAS_UNIT" ||
+      user.role === "PETUGAS_SUPER"
+    ) {
+      Pengaduan = await prisma.pengaduan.update({
+        where: {
+          id,
+        },
+        data: {
+          ...data,
+          approvedBy: user.no_identitas,
+        },
+      });
+    }
 
     Pengaduan = await prisma.pengaduan.update({
       where: {
