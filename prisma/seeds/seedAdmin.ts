@@ -5,7 +5,7 @@ import { ulid } from "ulid";
 export async function seedAdmin(prisma: PrismaClient) {
   // Check existing users for each role
   const countAdmin = await prisma.user.count({ where: { role: Roles.ADMIN } });
-  const countUser = await prisma.user.count({
+  const countTenagaKependidikan = await prisma.user.count({
     where: { role: Roles.TENAGA_KEPENDIDIKAN },
   });
   const countMahasiswa = await prisma.user.count({
@@ -94,7 +94,7 @@ export async function seedAdmin(prisma: PrismaClient) {
   }
 
   // Tenaga Kependidikan seed
-  if (countUser === 0) {
+  if (countTenagaKependidikan === 0) {
     const hashedPassword = await bcrypt.hash("tendik123", 12);
     await prisma.user.create({
       data: {
