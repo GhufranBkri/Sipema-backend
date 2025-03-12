@@ -84,6 +84,10 @@ export async function getAll(
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
       });
+
+      usedFilters.include = {
+        unit: false,
+      };
     }
 
     if (user.role === "KEPALA_PETUGAS_UNIT") {
