@@ -92,6 +92,7 @@ export async function seedAdmin(prisma: PrismaClient) {
     });
     console.log("Dosen seeded");
   }
+
   // Tenaga Kependidikan seed
   if (countUser === 0) {
     const hashedPassword = await bcrypt.hash("tendik123", 12);
