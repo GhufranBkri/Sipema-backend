@@ -2,7 +2,7 @@ import { Roles } from "@prisma/client";
 
 export function transformRoleToEnumRole(payload: any): Roles {
   if (!payload || typeof payload.role !== "string") {
-    return Roles.USER;
+    return Roles.MAHASISWA;
   }
 
   switch (payload.role) {
@@ -19,12 +19,12 @@ export function transformRoleToEnumRole(payload: any): Roles {
     case "KEPALA_WBS":
       return Roles.KEPALA_WBS;
     case "USER":
-      return Roles.USER;
+      return Roles.TENAGA_KEPENDIDIKAN;
     case "MAHASISWA":
       return Roles.MAHASISWA;
     case "DOSEN":
       return Roles.DOSEN;
     default:
-      return Roles.USER;
+      return Roles.MAHASISWA;
   }
 }

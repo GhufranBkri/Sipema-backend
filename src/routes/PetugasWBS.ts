@@ -5,9 +5,19 @@ import * as petugasWBSValidation from "$validations/PetugasWBSValidation";
 
 const PetugasWBSRoutes = new Hono();
 
-PetugasWBSRoutes.get("/", PetugasWBSController.getAll);
+PetugasWBSRoutes.get(
+  "/",
+  authMiddleware.checkJwt,
+  authMiddleware.checkRole(["KEPALA_WBS"]),
+  PetugasWBSController.getAll
+);
 
-PetugasWBSRoutes.get("/:id", PetugasWBSController.getById);
+PetugasWBSRoutes.get(
+  "/:id",
+  authMiddleware.checkJwt,
+  authMiddleware.checkRole(["KEPALA_WBS"]),
+  PetugasWBSController.getById
+);
 
 PetugasWBSRoutes.post(
   "/",
@@ -17,8 +27,18 @@ PetugasWBSRoutes.post(
   PetugasWBSController.create
 );
 
-PetugasWBSRoutes.put("/:id", PetugasWBSController.update);
+PetugasWBSRoutes.put(
+  "/:id",
+  authMiddleware.checkJwt,
+  authMiddleware.checkRole(["KEPALA_WBS"]),
+  PetugasWBSController.update
+);
 
-PetugasWBSRoutes.delete("/", PetugasWBSController.deleteByIds);
+PetugasWBSRoutes.delete(
+  "/",
+  authMiddleware.checkJwt,
+  authMiddleware.checkRole(["KEPALA_WBS"]),
+  PetugasWBSController.deleteByIds
+);
 
 export default PetugasWBSRoutes;

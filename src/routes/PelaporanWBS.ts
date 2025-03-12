@@ -13,6 +13,7 @@ PelaporanWBSRoutes.get(
     "KEPALA_WBS",
     "PETUGAS_SUPER",
     "DOSEN",
+    "TENAGA_KEPENDIDIKAN",
   ]),
   PelaporanWBSController.getAll
 );
@@ -20,13 +21,20 @@ PelaporanWBSRoutes.get(
 PelaporanWBSRoutes.get(
   "/:id",
   authMiddleware.checkJwt,
+  authMiddleware.checkRole([
+    "PETUGAS_WBS",
+    "KEPALA_WBS",
+    "PETUGAS_SUPER",
+    "DOSEN",
+    "TENAGA_KEPENDIDIKAN",
+  ]),
   PelaporanWBSController.getById
 );
 
 PelaporanWBSRoutes.post(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole(["DOSEN"]),
+  authMiddleware.checkRole(["DOSEN", "TENAGA_KEPENDIDIKAN"]),
   pengaudanValidation.validatePelaporanWBSDTO,
   PelaporanWBSController.create
 );
@@ -39,6 +47,7 @@ PelaporanWBSRoutes.put(
     "KEPALA_WBS",
     "PETUGAS_SUPER",
     "DOSEN",
+    "TENAGA_KEPENDIDIKAN",
   ]),
   PelaporanWBSController.update
 );
@@ -51,6 +60,7 @@ PelaporanWBSRoutes.delete(
     "KEPALA_WBS",
     "PETUGAS_SUPER",
     "DOSEN",
+    "TENAGA_KEPENDIDIKAN",
   ]),
   PelaporanWBSController.deleteByIds
 );

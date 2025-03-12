@@ -5,7 +5,9 @@ import { ulid } from "ulid";
 export async function seedAdmin(prisma: PrismaClient) {
   // Check existing users for each role
   const countAdmin = await prisma.user.count({ where: { role: Roles.ADMIN } });
-  const countUser = await prisma.user.count({ where: { role: Roles.USER } });
+  const countUser = await prisma.user.count({
+    where: { role: Roles.TENAGA_KEPENDIDIKAN },
+  });
   const countMahasiswa = await prisma.user.count({
     where: { role: Roles.MAHASISWA },
   });
@@ -90,22 +92,21 @@ export async function seedAdmin(prisma: PrismaClient) {
     });
     console.log("Dosen seeded");
   }
-
-  // User seed
+  // Tenaga Kependidikan seed
   if (countUser === 0) {
-    const hashedPassword = await bcrypt.hash("user123", 12);
+    const hashedPassword = await bcrypt.hash("tendik123", 12);
     await prisma.user.create({
       data: {
         id: ulid(),
-        name: "User",
+        name: "Tenaga Kependidikan",
         no_identitas: "2001",
         password: hashedPassword,
-        email: "user@test.com",
-        role: Roles.USER,
-        program_studi: "Teknik Informatika",
+        email: "tendik@test.com",
+        role: Roles.TENAGA_KEPENDIDIKAN,
+        program_studi: "Administrasi",
       },
     });
-    console.log("User seeded");
+    console.log("Tenaga Kependidikan seeded");
   }
 
   // Petugas Super seed

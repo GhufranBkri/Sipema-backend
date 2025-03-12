@@ -15,7 +15,7 @@ PengaduanRoutes.get(
     "PETUGAS_SUPER",
     "KEPALA_PETUGAS_UNIT",
     "DOSEN",
-    "USER",
+    "TENAGA_KEPENDIDIKAN",
     "MAHASISWA",
   ]),
   PengaduanController.getAll
@@ -29,7 +29,7 @@ PengaduanRoutes.get(
     "PETUGAS_SUPER",
     "KEPALA_PETUGAS_UNIT",
     "DOSEN",
-    "USER",
+    "TENAGA_KEPENDIDIKAN",
     "MAHASISWA",
   ]),
   PengaduanController.getById
@@ -38,7 +38,7 @@ PengaduanRoutes.get(
 PengaduanRoutes.post(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole(["DOSEN", "USER", "MAHASISWA"]),
+  authMiddleware.checkRole(["DOSEN", "TENAGA_KEPENDIDIKAN", "MAHASISWA"]),
   pengaudanValidation.validatePengaduanDTO,
   PengaduanController.create
 );
@@ -51,7 +51,7 @@ PengaduanRoutes.put(
     "PETUGAS_SUPER",
     "KEPALA_PETUGAS_UNIT",
     "DOSEN",
-    "USER",
+    "TENAGA_KEPENDIDIKAN",
     "MAHASISWA",
   ]),
   pengaudanValidation.validateUpdatePengaduanDTO,
@@ -66,7 +66,7 @@ PengaduanRoutes.delete(
     "PETUGAS_SUPER",
     "KEPALA_PETUGAS_UNIT",
     "DOSEN",
-    "USER",
+    "TENAGA_KEPENDIDIKAN",
     "MAHASISWA",
   ]),
   PengaduanController.deleteByIds

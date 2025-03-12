@@ -87,6 +87,7 @@ export async function getAll(
 
       usedFilters.include = {
         unit: false,
+        kategori: true,
       };
     }
 

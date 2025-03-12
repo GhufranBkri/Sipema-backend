@@ -11,7 +11,7 @@ datasource db {
 }
 
 enum Roles {
-  USER
+  TENAGA_KEPENDIDIKAN
   MAHASISWA
   DOSEN
   ADMIN
