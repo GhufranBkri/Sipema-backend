@@ -219,6 +219,10 @@ export async function update(
           approvedBy: user.no_identitas,
         },
       });
+      await NotificationUtils.sendStatusUpdateNotification(
+        Pengaduan,
+        user.name
+      );
     }
 
     Pengaduan = await prisma.pengaduan.update({

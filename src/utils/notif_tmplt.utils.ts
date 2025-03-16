@@ -4,15 +4,16 @@
 
 import { NotificationDTO } from "$entities/Notification";
 import { PengaduanDTO } from "$entities/Pengaduan";
+import { Pengaduan } from "@prisma/client";
 
 export const PengaduanNotifications = {
   /**
    * Notification for new complaint reports
    */
-  newComplaint: (data: PengaduanDTO, userId: string): NotificationDTO => ({
+  newComplaint: (data: PengaduanDTO): NotificationDTO => ({
     id: "",
     title: `📋 Laporan Baru: ${data.nameUnit}`,
-    message: `Pengaduan baru telah masuk di unit Anda. Mohon segera ditinjau.`,
+    message: `Pengaduan baru telah masuk di unit Anda dengan judul ${data.judul}. Mohon segera ditinjau.`,
     isRead: false,
     userId: "",
     type: "NEW_REPORT",
@@ -21,16 +22,16 @@ export const PengaduanNotifications = {
   /**
    * Notification for complaint status updates
    */
-  statusUpdate: (status: string) => ({
+  statusUpdate: (pengaduan: Pengaduan) => ({
     title: `🔄 Status Diperbarui`,
-    message: `Pengaduan Anda telah diperbarui ke status: ${status}`,
+    message: `Pengaduan Anda dengan judu; ${pengaduan.judul} telah diperbarui ke status: ${pengaduan.status}`,
   }),
 
   /**
    * Notification for complaint resolution
    */
-  resolved: (unitName: string) => ({
+  resolved: (data: PengaduanDTO) => ({
     title: `✅ Pengaduan Selesai`,
-    message: `Pengaduan di unit ${unitName} telah diselesaikan`,
+    message: `Pengaduan dengan judul ${data.judul} di unit ${data.nameUnit} telah diselesaikan`,
   }),
 };

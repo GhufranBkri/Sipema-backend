@@ -1,5 +1,7 @@
 // src/entities/Pengaduan.ts
 
+import { Status } from "@prisma/client";
+
 export interface PengaduanDTO {
   id: string;
   judul: string;
@@ -8,6 +10,7 @@ export interface PengaduanDTO {
   kategoriId: string;
   pelaporId: string;
   nameUnit: string;
+  status: Status;
   filePendukung?: string;
   filePetugas?: string;
   harapanPelapor?: string;

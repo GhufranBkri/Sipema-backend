@@ -92,12 +92,21 @@ export async function validateUpdatePengaduanDTO(c: Context, next: Next) {
   // const data: PengaduanDTO = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
   const user: UserJWTDAO = c.get("jwtPayload");
+  const data: PengaduanDTO = await c.req.json();
 
   const id = c.req.param("id");
   const pengaduan = await prisma.pengaduan.findUnique({
     where: { id },
     include: { pelapor: true },
   });
+
+  if (user.role === "DOSEN" || user.role === "MAHASISWA") {
+    if (data.status) {
+      invalidFields.push(
+        generateErrorStructure("status", "not authorized to update status")
+      );
+    }
+  }
 
   if (!pengaduan) {
     invalidFields.push(generateErrorStructure("id", "complaint not found"));

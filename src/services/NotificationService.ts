@@ -49,6 +49,13 @@ export async function getAll(
       }),
     ]);
 
+    const notRead = await prisma.notification.count({
+      where: {
+        userId: user.no_identitas,
+        isRead: false,
+      },
+    });
+
     let totalPage = 1;
     if (totalData > usedFilters.take)
       totalPage = Math.ceil(totalData / usedFilters.take);
@@ -57,6 +64,7 @@ export async function getAll(
       status: true,
       data: {
         entries: notification,
+        notRead,
         totalData,
         totalPage,
       },
