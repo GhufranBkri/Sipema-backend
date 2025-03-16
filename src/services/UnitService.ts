@@ -192,6 +192,13 @@ export async function getAll(
       };
     }
 
+    if (user?.role === "KEPALA_PETUGAS_UNIT") {
+      usedFilters.include = {
+        kepalaUnit: true,
+        petugas: true,
+      };
+    }
+
     const [Unit, totalData] = await Promise.all([
       prisma.unit.findMany(usedFilters),
       prisma.unit.count({
@@ -252,6 +259,25 @@ export async function update(
 
     if (!unit) {
       return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    if (data.kepalaUnit) {
+      const kepalaUnit = await prisma.user.findUnique({
+        where: { no_identitas: data.kepalaUnit },
+      });
+
+      if (!kepalaUnit) {
+        return BadRequestWithMessage("Referenced Kepala Unit not found");
+      }
+
+      await prisma.user.update({
+        where: {
+          no_identitas: data.kepalaUnit,
+        },
+        data: {
+          unitId: id,
+        },
+      });
     }
 
     const updatedUnit = await prisma.unit.update({

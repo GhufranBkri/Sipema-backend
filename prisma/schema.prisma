@@ -29,7 +29,31 @@ enum Status {
   COMPLETED
 }
 
+enum NotificationType {
+  NEW_REPORT
+  REPORT_UPDATED
+}
 
+model Notification {
+  id                   String           @id @default(cuid())
+  userId               String
+  title                String
+  message              String
+  isRead               Boolean          @default(false)
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  type                 NotificationType
+  user                 User             @relation(fields: [userId], references: [no_identitas])
+  
+  pengaduanId          String?
+  pengaduan            Pengaduan?       @relation(fields: [pengaduanId], references: [id])
+  
+  pengaduanMasyarakatId String?
+  pengaduanMasyarakat  PengaduanMasyarakat? @relation(fields: [pengaduanMasyarakatId], references: [id])
+  
+  pelaporanWBSId       String?
+  pelaporanWBS         PelaporanWBS?    @relation(fields: [pelaporanWBSId], references: [id])
+}
 
 model User {
   id            String      @id @default(cuid())
@@ -42,18 +66,15 @@ model User {
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
   role          Roles
-  // Relasi untuk pelapor
   pengaduan     Pengaduan[] @relation("pelapor")
-  // relasi untuk Pelaporan WBS
-  pengaduanWBS PelaporanWBS[] @relation("pelapor")
-  // Relasi untuk petugas unit
+  pengaduanWBS  PelaporanWBS[] @relation("pelapor")
+  notifications Notification[] 
   unit_petugas  Unit?     @relation("petugas", fields: [unitId], references: [id])
   unitId        String?
   unit_kepala   Unit?     @relation("kepalaUnit")
   petugas_wbs   PetugasWBS[]  @relation("petugasWBS")    
   kepala_wbs    PetugasWBS? @relation("kepalaWBS")    
 }
-
 model Unit {
   id                  String                @id @default(cuid())
   nama_unit           String                @unique
@@ -92,14 +113,15 @@ model PelaporanWBS {
   tanggalKejadian DateTime
   lokasi         String
   kategoriId     String 
-  unit          String
+  unit           String
   kategori       KategoriWBS  @relation(fields: [kategoriId], references: [id])
   pelaporId      String?
-  petugasWBS    PetugasWBS? @relation(fields: [petugasWBSId], references: [id])
-  petugasWBSId  String?
+  petugasWBS     PetugasWBS? @relation(fields: [petugasWBSId], references: [id])
+  petugasWBSId   String?
   pelapor        User?      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   status         Status     @default(PENDING)
-  approvedBy    String?
+  notfications   Notification[]
+  approvedBy     String?
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   response       String?
@@ -126,6 +148,7 @@ model PengaduanMasyarakat {
   updatedAt     DateTime @updatedAt
   nama          String
   filePendukung String?
+  notfications  Notification[]
   approvedBy    String?
   no_telphone   String
   filePetugas   String?
@@ -145,6 +168,7 @@ model Pengaduan {
   kategori      Kategori @relation(fields: [kategoriId], references: [id])
   pelapor       User     @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   unit          Unit     @relation(fields: [nameUnit], references: [nama_unit])
+  notfications  Notification[]
   approvedBy    String?
   harapan_pelapor String? 
   filePendukung String?

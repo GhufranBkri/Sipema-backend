@@ -153,6 +153,15 @@ export async function seedAdmin(prisma: PrismaClient) {
       },
     });
 
+    await prisma.user.update({
+      where: {
+        no_identitas: unit.kepalaUnitId,
+      },
+      data: {
+        unitId: unit.id,
+      },
+    });
+
     // Petugas seed with unit assignment
     const hashedPassword = await bcrypt.hash("petugas123", 12);
     await prisma.user.create({

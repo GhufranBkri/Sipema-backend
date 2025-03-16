@@ -152,25 +152,6 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
       }
 
       // Check if any petugas is already in this unit
-      const currentUnit = await prisma.unit.findUnique({
-        where: { nama_unit: unit?.nama_unit },
-        include: { petugas: true },
-      });
-
-      if (currentUnit) {
-        const existingPetugasInUnit = currentUnit.petugas.filter((petugas) =>
-          data.petugasIds.includes(petugas.no_identitas)
-        );
-
-        if (existingPetugasInUnit.length > 0) {
-          invalidFields.push(
-            generateErrorStructure(
-              "petugasIds",
-              "some petugas are already assigned to this unit"
-            )
-          );
-        }
-      }
 
       // Check if petugas is in another unit
       const petugasInOtherUnit = await prisma.unit.findFirst({
@@ -218,25 +199,17 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
     );
   }
   // Check if petugas exists in the specified unit
-  const unit = await prisma.unit.findFirst({
+  const existingPetugas = await prisma.user.findMany({
     where: {
-      nama_unit: nama_unit,
-      petugas: {
-        some: {
-          no_identitas: {
-            in: data.petugasIds,
-          },
-        },
+      no_identitas: {
+        in: data.petugasIds,
       },
     },
   });
 
-  if (!unit) {
+  if (existingPetugas.length !== data.petugasIds.length) {
     invalidFields.push(
-      generateErrorStructure(
-        "petugasIds",
-        "one or more petugas not found in this unit"
-      )
+      generateErrorStructure("petugasIds", "petugas IDs do not exist")
     );
   }
 

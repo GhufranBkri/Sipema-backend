@@ -10,9 +10,9 @@ import { Pengaduan } from "@prisma/client";
 import { PengaduanDTO } from "$entities/Pengaduan";
 import { ErrorHandler } from "$utils/errorHandler";
 import Logger from "$pkg/logger";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
+import { NotificationUtils } from "$utils/notification.utils";
 
 export type CreateResponse = Pengaduan | {};
 export async function create(
@@ -28,34 +28,30 @@ export async function create(
       },
     });
 
-    return {
-      status: true,
-      data: pengaduan,
-    };
+    // Get staff members
+    const unit = await prisma.unit.findUnique({
+      where: { nama_unit: data.nameUnit },
+    });
+
+    const staff = await prisma.user.findMany({
+      where: {
+        unitId: unit?.id,
+        role: { in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"] },
+      },
+    });
+
+    // Send notifications to all staff members
+    for (const staffMember of staff) {
+      await NotificationUtils.sendNewComplaintNotification(
+        data,
+        staffMember.no_identitas,
+        pengaduan.id
+      );
+    }
+
+    return { status: true, data: pengaduan };
   } catch (error) {
-    // If error is a ServiceResponse (from validator), return it directly
-
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "status" in error &&
-      !error.status
-    ) {
-      return error as ServiceResponse<CreateResponse>;
-    }
-
-    // Handle Prisma errors
-    if (error instanceof PrismaClientKnownRequestError) {
-      Logger.error(`Database Error: ${error.code} - ${error.message}`);
-      return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
-    }
-
-    // Handle other errors
-    Logger.error(
-      `Service Error: ${
-        error instanceof Error ? error.message : JSON.stringify(error)
-      }`
-    );
+    // Error handling
     return ErrorHandler.handleServiceError(error);
   }
 }

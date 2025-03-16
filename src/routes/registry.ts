@@ -7,6 +7,7 @@ import UserRoutes from "./User";
 import KategoriWBSRoutes from "./KategoriWBS";
 import PelaporanWBSRoutes from "./PelaporanWBS";
 import PetugasWBSRoutes from "./PetugasWBS";
+import NotificationRoutes from "./Notification";
 
 const RoutesRegistry = {
   UserRoutes,
@@ -18,6 +19,7 @@ const RoutesRegistry = {
   KategoriWBSRoutes,
   PelaporanWBSRoutes,
   PetugasWBSRoutes,
+  NotificationRoutes,
 };
 
 export default RoutesRegistry;
