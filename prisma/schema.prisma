@@ -116,10 +116,10 @@ model PelaporanWBS {
   kategoriId     String 
   unit           String
   kategori       KategoriWBS  @relation(fields: [kategoriId], references: [id])
-  pelaporId      String?
+  pelaporId      String
   petugasWBS     PetugasWBS? @relation(fields: [petugasWBSId], references: [id])
   petugasWBSId   String?
-  pelapor        User?      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
+  pelapor        User      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   status         Status     @default(PENDING)
   notfications   Notification[]
   approvedBy     String?

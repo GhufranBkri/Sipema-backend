@@ -116,7 +116,7 @@ export async function getAll(
       }
 
       usedFilters.where.AND.push({
-        nameUnit: officerUnit.nama_unit, // Menggunakan nameUnit bukan unit
+        nameUnit: officerUnit.nama_unit,
       });
     }
 
@@ -219,10 +219,15 @@ export async function update(
           approvedBy: user.no_identitas,
         },
       });
-      await NotificationUtils.sendStatusUpdateNotification(
-        Pengaduan,
-        user.name
-      );
+      if (data.status) {
+        await NotificationUtils.sendStatusUpdateNotification(
+          Pengaduan.judul,
+          Pengaduan.status,
+          Pengaduan.pelaporId,
+          Pengaduan.id,
+          user.no_identitas
+        );
+      }
     }
 
     Pengaduan = await prisma.pengaduan.update({

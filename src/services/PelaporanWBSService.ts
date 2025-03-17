@@ -10,6 +10,7 @@ import { PelaporanWBS } from "@prisma/client";
 import { PelaporanWBSDTO } from "$entities/PelaporanWBS";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
+import { NotificationUtils } from "$utils/notification.utils";
 
 export type CreateResponse = PelaporanWBS | {};
 export async function create(
@@ -28,6 +29,20 @@ export async function create(
         pelaporId: user.no_identitas,
       },
     });
+
+    const staff = await prisma.user.findMany({
+      where: {
+        role: { in: ["KEPALA_WBS", "PETUGAS_WBS"] },
+      },
+    });
+
+    for (const staffMember of staff) {
+      await NotificationUtils.sendNewComplaintWBSNotfication(
+        pelaporanWBS.judul,
+        staffMember.no_identitas,
+        pelaporanWBS.id
+      );
+    }
 
     return {
       status: true,
@@ -146,6 +161,13 @@ export async function update(
           approvedBy: user.no_identitas,
         },
       });
+      await NotificationUtils.sendStatusUpdateNotificationWBS(
+        pelaporanWBS.judul,
+        pelaporanWBS.status,
+        pelaporanWBS.pelaporId,
+        pelaporanWBS.id,
+        user.no_identitas
+      );
     }
 
     {
