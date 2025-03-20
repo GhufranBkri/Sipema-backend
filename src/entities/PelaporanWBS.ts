@@ -1,3 +1,5 @@
+import { Status } from "@prisma/client";
+
 export interface PelaporanWBSDTO {
   id: string;
   judul: string;
@@ -6,7 +8,10 @@ export interface PelaporanWBSDTO {
   pihakTerlibat: string;
   kategoriId: string;
   pelaporId: string;
+  status: Status;
   tanggalKejadian: Date;
+  filePendukung?: string;
+  filePetugas?: string;
   unit: string;
   petugasWBSId?: string;
 }

@@ -126,6 +126,8 @@ model PelaporanWBS {
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
   response       String?
+  filePendukung String?
+  filePetugas   String?
 }
 
 model KategoriWBS {

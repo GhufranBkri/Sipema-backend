@@ -3,6 +3,7 @@ import { response_bad_request } from "$utils/response.utils";
 import { ErrorStructure, generateErrorStructure } from "./helper";
 import { PelaporanWBSDTO } from "$entities/PelaporanWBS";
 import { prisma } from "$utils/prisma.utils";
+import { UserJWTDAO } from "$entities/User";
 
 export async function validatePelaporanWBSDTO(c: Context, next: Next) {
   const data: PelaporanWBSDTO = await c.req.json();
@@ -100,5 +101,61 @@ export async function validatePelaporanWBSDTO(c: Context, next: Next) {
     return response_bad_request(c, "Validation Error", invalidFields);
   }
 
+  await next();
+}
+
+export async function validatePelaporanWBSUpdateDTO(c: Context, next: Next) {
+  const data: PelaporanWBSDTO = await c.req.json();
+  const invalidFields: ErrorStructure[] = [];
+  const user: UserJWTDAO = c.get("jwtPayload");
+
+  const id = c.req.param("id");
+
+  const pelaporan = await prisma.pelaporanWBS.findUnique({
+    where: { id },
+    include: { pelapor: true },
+  });
+
+  if (!pelaporan) {
+    invalidFields.push(generateErrorStructure("id", "complaint not found"));
+  } else if (
+    pelaporan.pelapor.no_identitas !== user.no_identitas &&
+    user.role === "DOSEN"
+  ) {
+    invalidFields.push(
+      generateErrorStructure("id", "not authorized to update this complaint")
+    );
+  }
+
+  if (user.role === "DOSEN") {
+    if (data.status) {
+      invalidFields.push(
+        generateErrorStructure("status", "not authorized to update status")
+      );
+    }
+  }
+
+  if (
+    user.role === "KEPALA_WBS" ||
+    user.role === "PETUGAS_WBS" ||
+    user.role === "PETUGAS_SUPER"
+  ) {
+    const allowedFields = ["status", "response"];
+    const updatedFields = Object.keys(data);
+
+    for (const field of updatedFields) {
+      if (!allowedFields.includes(field)) {
+        invalidFields.push(
+          generateErrorStructure(field, `not allowed to update ${field}`)
+        );
+      }
+    }
+  }
+  // Return error response if validation fails
+  if (invalidFields.length !== 0) {
+    return response_bad_request(c, "Validation Error", invalidFields);
+  }
+
+  // Continue to the next middleware if validation passes
   await next();
 }

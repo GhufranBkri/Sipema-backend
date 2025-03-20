@@ -49,6 +49,7 @@ PelaporanWBSRoutes.put(
     "DOSEN",
     "TENAGA_KEPENDIDIKAN",
   ]),
+  pengaudanValidation.validatePelaporanWBSUpdateDTO,
   PelaporanWBSController.update
 );
 
