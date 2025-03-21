@@ -18,31 +18,32 @@ export const INTERNAL_SERVER_ERROR_SERVICE_RESPONSE: ServiceResponse<{}> = {
   data: {},
   err: {
     message: "Internal Server Error",
-    code: 500
-  }
-}
+    code: 500,
+  },
+};
 
 export const INVALID_ID_SERVICE_RESPONSE: ServiceResponse<{}> = {
   status: false,
   data: {},
   err: {
     message: "Invalid ID, Data not Found",
-    code: 404
-  }
-}
+    code: 404,
+  },
+};
 
 // 409 Conflict Response
-export function ConflictResponse(message: string = "Data already exists"): ServiceResponse<{}> {
+export function ConflictResponse(
+  message: string = "Data already exists"
+): ServiceResponse<{}> {
   return {
     status: false,
     data: {},
     err: {
       message,
-      code: 409
-    }
-  }
+      code: 409,
+    },
+  };
 }
-
 
 export function BadRequestWithMessage(message: string): ServiceResponse<{}> {
   return {
@@ -50,18 +51,24 @@ export function BadRequestWithMessage(message: string): ServiceResponse<{}> {
     data: {},
     err: {
       message,
-      code: 404
-    }
-  }
+      code: 404,
+    },
+  };
 }
 
-export function createUploadErrorResponse(message: string): ServiceResponse<UploadResponse> {
+export function createUploadErrorResponse(
+  message: string
+): ServiceResponse<UploadResponse> {
   return {
     status: false,
-    message: message,
     data: {
-      secure_url: '',
-      public_id: '',
-    }
+      secure_url: "",
+      public_id: "",
+      size: 0,
+    },
+    err: {
+      message: message,
+      code: 400,
+    },
   };
 }

@@ -4,12 +4,13 @@ import { createUploadErrorResponse, ServiceResponse } from "$entities/Service";
 import { UploadResponse } from "$entities/UploadFile";
 import Logger from "$pkg/logger";
 import cloudinary from "$utils/cloudinary.utils";
+import { ALLOWED_FORMATS, MAX_FILE_SIZE } from "$utils/format.utils";
+import { UploadApiOptions, UploadApiResponse } from "cloudinary";
 
 export async function uploadFile(
   file: any
 ): Promise<ServiceResponse<UploadResponse>> {
   try {
-    // Handle different file upload formats without relying on File constructor
     let mimeType: string;
     let fileName: string;
     let fileData = file;
@@ -23,6 +24,22 @@ export async function uploadFile(
     mimeType = fileData.type || file.mimetype || "application/octet-stream";
     fileName = fileData.name || file.originalname || `file_${Date.now()}`;
 
+    // Validate file format
+    if (!ALLOWED_FORMATS.includes(mimeType)) {
+      throw new Error(
+        `Unsupported file type. Allowed formats: ${ALLOWED_FORMATS.join(", ")}`
+      );
+    }
+
+    // Validate file size
+    const fileSize = fileData.size || file.size;
+    if (fileSize > MAX_FILE_SIZE) {
+      throw new Error(
+        `File size too large. Maximum size allowed is ${
+          MAX_FILE_SIZE / 1024 / 1024
+        }MB`
+      );
+    }
     // Debug file object
     Logger.info("File object:", {
       type: mimeType,
@@ -49,18 +66,36 @@ export async function uploadFile(
       throw new Error("Unsupported file format");
     }
 
-    // Upload to cloudinary
-    const result = await cloudinary.uploader.upload(uploadPath, {
+    // Upload to cloudinary with format-specific options
+    const uploadOptions: UploadApiOptions = {
       folder: "UploadFile",
       public_id: `file_${Date.now()}`,
-      resource_type: "auto",
-    });
+      resource_type: "auto" as const, // Type assertion to fix resource_type error
+    };
+
+    // Add PDF-specific options if the file is a PDF
+    if (mimeType === "application/pdf") {
+      Object.assign(uploadOptions, {
+        resource_type: "raw",
+        format: "pdf",
+        use_filename: true,
+        unique_filename: true,
+      });
+    }
+
+    const result: UploadApiResponse = await cloudinary.uploader.upload(
+      uploadPath,
+      uploadOptions,
+      (pages) => true
+    );
 
     return {
       status: true,
       data: {
         secure_url: result.secure_url,
         public_id: result.public_id,
+        // Remove format from response since it's not in UploadResponse type
+        size: fileSize,
       },
     };
   } catch (err) {

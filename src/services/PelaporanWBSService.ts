@@ -118,6 +118,9 @@ export async function getById(
       where: {
         id,
       },
+      include: {
+        kategori: true,
+      },
     });
 
     if (!pelaporanWBS) return INVALID_ID_SERVICE_RESPONSE;
