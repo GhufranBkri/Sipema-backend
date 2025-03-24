@@ -212,7 +212,7 @@ export async function seedAdmin(prisma: PrismaClient) {
       nama_unit: "Unit TI",
     },
   });
-  if (findUnit) {
+  if (!findUnit) {
     const findPetugas = await prisma.userLevels.findUnique({
       where: {
         name: "PETUGAS",

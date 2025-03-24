@@ -180,12 +180,12 @@ model Pengaduan {
   kategoriId    String
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  nama          String
+  nama          String?
   filePendukung String?
   notfications  Notification[]
   approvedBy    String?
   tipePengaduan TypePengaduan
-  no_telphone   String
+  no_telphone   String?
   filePetugas   String?
   harapan_pelapor String?
 }

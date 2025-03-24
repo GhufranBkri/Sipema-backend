@@ -112,6 +112,17 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
 
 export async function seedAcl(prisma: PrismaClient): Promise<void> {
   try {
+    // Check if ACL entries already exist
+    const existingFeatures = await prisma.features.count();
+    const existingActions = await prisma.actions.count();
+    const existingAcl = await prisma.acl.count();
+
+    if (existingFeatures > 0 && existingActions > 0 && existingAcl > 0) {
+      console.log("ℹ️ ACL data already exists, skipping seed");
+      return;
+    }
+
+    // If no existing data, proceed with seeding
     await seedAdminPermissions(prisma);
     await seedUserLevelPermissions(prisma);
     console.log("✅ All ACL permissions seeded successfully");
@@ -131,6 +142,16 @@ async function seedAdminPermissions(prisma: PrismaClient): Promise<void> {
     return;
   }
 
+  // Check if admin already has permissions
+  const existingAdminAcl = await prisma.acl.findFirst({
+    where: { userLevelId: adminLevel.id },
+  });
+
+  if (existingAdminAcl) {
+    console.log("ℹ️ Admin permissions already exist, skipping");
+    return;
+  }
+
   await createFeaturesAndActions(prisma, ADMIN_PERMISSIONS);
   await linkAdminToPermissions(prisma, adminLevel.id);
 }
@@ -145,6 +166,16 @@ async function seedUserLevelPermissions(prisma: PrismaClient): Promise<void> {
 
     if (!userLevel) {
       console.log(`⚠️ User level ${levelName} not found`);
+      continue;
+    }
+
+    // Check if level already has permissions
+    const existingLevelAcl = await prisma.acl.findFirst({
+      where: { userLevelId: userLevel.id },
+    });
+
+    if (existingLevelAcl) {
+      console.log(`ℹ️ Permissions for ${levelName} already exist, skipping`);
       continue;
     }
 

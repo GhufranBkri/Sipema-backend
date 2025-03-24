@@ -3,9 +3,10 @@ import { Unit, UserLevels } from "@prisma/client";
 export interface UserJWTDAO {
   id: string;
   email: string;
-  name: string; // ganti fullName menjadi name
-  no_identitas: string; // tambahkan field baru
+  name: string;
+  no_identitas: string;
   userLevelId: string;
+  no_telphone: string;
   userLevel: {
     id: string;
     name: UserLevels;
@@ -24,6 +25,7 @@ export interface UserRegisterDTO {
   password: string;
   name: string; // sesuaikan dengan schema
   no_identitas: string; // tambahkan field wajib
+  no_telphone?: string; // tambahkan field wajib
   program_studi?: string; // field opsional
   userLevelName: string;
 }

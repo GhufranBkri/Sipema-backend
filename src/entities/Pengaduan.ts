@@ -9,7 +9,7 @@ export interface PengaduanDTO {
   unitId: string;
   response: string;
   kategoriId: string;
-  nama: string;
+  nama?: string;
   no_telphone: string;
   filePendukung: string;
   tipePengaduan: TypePengaduan;

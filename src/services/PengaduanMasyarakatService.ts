@@ -165,7 +165,7 @@ export async function update(
     // Send WhatsApp notification
     const waService = new WaService();
     await waService.sendStatusUpdate(
-      pengaduanMasyarakat.no_telphone,
+      pengaduanMasyarakat.no_telphone || "",
       pengaduanMasyarakat
     );
 

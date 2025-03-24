@@ -100,6 +100,7 @@ export async function register(
         password: hashedPassword,
         name: data.name,
         no_identitas: data.no_identitas,
+        no_telphone: data.no_telphone || null,
         program_studi: data.program_studi || null,
         userLevelId: finduserLevel.id,
       },

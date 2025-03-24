@@ -6,7 +6,7 @@ import {
   ServiceResponse,
 } from "$entities/Service";
 import { prisma } from "$utils/prisma.utils";
-import { Pengaduan } from "@prisma/client";
+import { Pengaduan, TypePengaduan } from "@prisma/client";
 import { ErrorHandler } from "$utils/errorHandler";
 import Logger from "$pkg/logger";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
@@ -25,6 +25,9 @@ export async function create(
       data: {
         ...data,
         pelaporId: user.no_identitas,
+        nama: user.name,
+        tipePengaduan: TypePengaduan.USER,
+        no_telphone: user.no_telphone || "",
       },
     });
 

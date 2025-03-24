@@ -191,18 +191,14 @@ export async function getAll(
       },
     });
 
-    if (!userLevel) {
-      return INVALID_ID_SERVICE_RESPONSE;
-    }
-
-    if (userLevel.name === "ADMIN") {
+    if (userLevel?.name === "ADMIN") {
       usedFilters.include = {
         kepalaUnit: true,
         petugas: true,
       };
     }
 
-    if (userLevel.name === "KEPALA_PETUGAS_UNIT") {
+    if (userLevel?.name === "KEPALA_PETUGAS_UNIT") {
       usedFilters.include = {
         kepalaUnit: true,
         petugas: true,

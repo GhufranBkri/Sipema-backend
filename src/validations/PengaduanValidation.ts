@@ -44,7 +44,7 @@ export async function validatePengaduanDTO(c: Context, next: Next) {
   const data: PengaduanDTO = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
   const existingUnit = await prisma.unit.findUnique({
-    where: { nama_unit: data.unitId },
+    where: { id: data.unitId },
   });
   const existingKategori = await prisma.kategori.findUnique({
     where: { id: data.kategoriId },
