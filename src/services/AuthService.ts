@@ -28,20 +28,41 @@ export async function logIn(data: UserLoginDTO): Promise<ServiceResponse<any>> {
   try {
     const { no_identitas, password } = data;
 
-    const user: any = await prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: {
         no_identitas: no_identitas,
       },
+      include: {
+        userLevel: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
 
-    const isPasswordVerified = await bcrypt.compareSync(
-      password,
-      user.password
-    );
+    if (!user) {
+      return {
+        status: false,
+        err: {
+          message: "Invalid credential!",
+          code: 404,
+        },
+        data: {},
+      };
+    }
 
-    if (user && isPasswordVerified) {
+    const isPasswordVerified = await bcrypt.compare(password, user.password);
+
+    if (isPasswordVerified) {
       const token = createToken(user);
-      return { status: true, data: { user: exclude(user, "password"), token } };
+      return {
+        status: true,
+        data: {
+          user: exclude(user, "password"),
+          token,
+        },
+      };
     } else {
       return {
         status: false,
