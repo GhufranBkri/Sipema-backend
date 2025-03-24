@@ -65,6 +65,11 @@ export async function getAll(
               nama_unit: true,
             },
           },
+          userLevel: {
+            select: {
+              name: true,
+            },
+          },
           pengaduan: {
             select: {
               id: true,
