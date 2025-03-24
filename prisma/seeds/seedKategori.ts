@@ -64,46 +64,56 @@ export async function seedKategori(prisma: PrismaClient) {
 }
 
 export async function seedKategoriWBS(prisma: PrismaClient) {
-  const KategoriWBS = await prisma.kategoriWBS.count();
+  const KategoriWBS = await prisma.kategori.count({
+    where: { isWBS: true },
+  });
   if (KategoriWBS === 0) {
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Korupsi atau Gratifikasi",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Penyalahgunaan Wewenang",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Pelanggaran Etika",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Pencurian atau Penipuan",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Pelanggaran Kesehatan dan Keselamatan Kerja (K3)",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Perlakuan Tidak Adil atau Diskriminasi",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Kerugian Keuangan",
+        isWBS: true,
       },
     });
-    await prisma.kategoriWBS.create({
+    await prisma.kategori.create({
       data: {
         nama: "Pelanggaran Terhadap Regulasi atau Hukum",
+        isWBS: true,
       },
     });
   }

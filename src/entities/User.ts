@@ -1,11 +1,15 @@
-import { Roles, Unit } from "@prisma/client";
+import { Unit, UserLevels } from "@prisma/client";
 
 export interface UserJWTDAO {
   id: string;
   email: string;
   name: string; // ganti fullName menjadi name
   no_identitas: string; // tambahkan field baru
-  role: Roles;
+  userLevelId: string;
+  userLevel: {
+    id: string;
+    name: UserLevels;
+  };
   program_studi?: string;
   unitId?: string;
 }
@@ -21,7 +25,7 @@ export interface UserRegisterDTO {
   name: string; // sesuaikan dengan schema
   no_identitas: string; // tambahkan field wajib
   program_studi?: string; // field opsional
-  role: Roles;
+  userLevelName: string;
 }
 
 export interface UserDTO {

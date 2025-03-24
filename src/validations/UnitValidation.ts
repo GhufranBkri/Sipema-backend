@@ -28,11 +28,14 @@ export async function validateUnitCreateDTO(c: Context, next: Next) {
       where: { no_identitas: data.kepalaUnit },
     });
 
+    const finduserLevel = await prisma.userLevels.findUnique({
+      where: { name: "KEPALA_PETUGAS_UNIT" },
+    });
     if (!existingUser) {
       invalidFields.push(
         generateErrorStructure("kepalaUnit", "user not found")
       );
-    } else if (existingUser.role !== "KEPALA_PETUGAS_UNIT") {
+    } else if (existingUser.userLevelId !== finduserLevel?.id) {
       invalidFields.push(
         generateErrorStructure(
           "kepalaUnit",
@@ -71,9 +74,13 @@ export async function validateUnitUpdateDTO(c: Context, next: Next) {
       where: { no_identitas: data.petugasId },
     });
 
+    const finduserLevel = await prisma.userLevels.findUnique({
+      where: { name: "KEPALA_PETUGAS_UNIT" },
+    });
+
     if (!existingUser) {
       invalidFields.push(generateErrorStructure("petugasId", "user not found"));
-    } else if (existingUser.role !== "PETUGAS") {
+    } else if (existingUser.userLevelId !== finduserLevel?.id) {
       invalidFields.push(
         generateErrorStructure(
           "petugasId",
@@ -142,8 +149,12 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
       );
     } else {
       // Check if all users have PETUGAS role
+      const finduserLevel = await prisma.userLevels.findUnique({
+        where: { name: "KEPALA_PETUGAS_UNIT" },
+      });
+
       const nonPetugasUsers = existingPetugas.filter(
-        (user) => user.role !== "PETUGAS"
+        (user) => user.userLevelId !== finduserLevel?.id
       );
       if (nonPetugasUsers.length > 0) {
         invalidFields.push(

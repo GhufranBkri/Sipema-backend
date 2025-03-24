@@ -3,16 +3,15 @@
  */
 
 import { NotificationDTO } from "$entities/Notification";
-import { PengaduanDTO } from "$entities/Pengaduan";
 
 export const PengaduanNotifications = {
   /**
    * Notification for new complaint reports
    */
-  newComplaint: (data: PengaduanDTO): NotificationDTO => ({
+  newComplaint: (nameUnit: string, judul: string): NotificationDTO => ({
     id: "",
-    title: `📋 Laporan Baru: ${data.nameUnit}`,
-    message: `Pengaduan baru telah masuk di unit Anda dengan judul ${data.judul}. Mohon segera ditinjau.`,
+    title: `📋 Laporan Baru: ${nameUnit}`,
+    message: `Pengaduan baru telah masuk di unit Anda dengan judul ${judul}. Mohon segera ditinjau.`,
     isRead: false,
     userId: "",
     type: "NEW_REPORT",
@@ -40,8 +39,8 @@ export const PengaduanNotifications = {
   /**
    * Notification for complaint resolution
    */
-  resolved: (data: PengaduanDTO) => ({
+  resolved: (judul: string, nameUnit: string) => ({
     title: `✅ Pengaduan Selesai`,
-    message: `Pengaduan dengan judul ${data.judul} di unit ${data.nameUnit} telah diselesaikan`,
+    message: `Pengaduan dengan judul ${judul} di unit ${nameUnit} telah diselesaikan`,
   }),
 };

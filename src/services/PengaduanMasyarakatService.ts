@@ -7,25 +7,27 @@ import {
 } from "$entities/Service";
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
-import { PengaduanMasyarakat } from "@prisma/client";
-import { PengaduanMasyarakatDTO } from "$entities/PengaduanMasyarakat";
+import { Pengaduan, TypePengaduan } from "@prisma/client";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
 import WaService from "./waService";
+import { PengaduanDTO } from "$entities/Pengaduan";
 
 const waService = new WaService();
 
-export type CreateResponse = PengaduanMasyarakat | {};
+export type CreateResponse = Pengaduan | {};
 export async function create(
-  data: PengaduanMasyarakatDTO
+  data: PengaduanDTO
 ): Promise<ServiceResponse<CreateResponse>> {
   try {
     // Create pengaduan
-    const pengaduan = await prisma.pengaduanMasyarakat.create({
-      data,
+    const pengaduan = await prisma.pengaduan.create({
+      data: {
+        ...data,
+        tipePengaduan: TypePengaduan.MASYARAKAT,
+      },
     });
 
-    // Prepare WhatsApp template data
     // Send WhatsApp notification
     if (data.no_telphone) {
       await waService.sendMessage(data.no_telphone, data);
@@ -41,7 +43,7 @@ export async function create(
   }
 }
 
-export type GetAllResponse = PagedList<PengaduanMasyarakat[]> | {};
+export type GetAllResponse = PagedList<Pengaduan[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
   user: UserJWTDAO
@@ -59,7 +61,20 @@ export async function getAll(
       kategori: true,
     };
 
-    if (user.role === "PETUGAS" || user.role === "KEPALA_PETUGAS_UNIT") {
+    const userLevel = await prisma.userLevels.findUnique({
+      where: {
+        id: user.userLevelId,
+      },
+    });
+
+    if (!userLevel) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    if (
+      userLevel.name === "PETUGAS" ||
+      userLevel.name === "KEPALA_PETUGAS_UNIT"
+    ) {
       const officerUnit = await prisma.unit.findFirst({
         where: {
           petugas: {
@@ -77,9 +92,9 @@ export async function getAll(
       });
     }
 
-    const [pengaduanMasyarakat, totalData] = await Promise.all([
-      prisma.pengaduanMasyarakat.findMany(usedFilters),
-      prisma.pengaduanMasyarakat.count({
+    const [pengaduan, totalData] = await Promise.all([
+      prisma.pengaduan.findMany(usedFilters),
+      prisma.pengaduan.count({
         where: usedFilters.where,
       }),
     ]);
@@ -91,7 +106,7 @@ export async function getAll(
     return {
       status: true,
       data: {
-        entries: pengaduanMasyarakat,
+        entries: pengaduan,
         totalData,
         totalPage,
       },
@@ -102,12 +117,12 @@ export async function getAll(
   }
 }
 
-export type GetByIdResponse = PengaduanMasyarakat | {};
+export type GetByIdResponse = Pengaduan | {};
 export async function getById(
   id: string
 ): Promise<ServiceResponse<GetByIdResponse>> {
   try {
-    let pengaduanMasyarakat = await prisma.pengaduanMasyarakat.findUnique({
+    let pengaduanMasyarakat = await prisma.pengaduan.findUnique({
       where: {
         id,
       },
@@ -125,21 +140,21 @@ export async function getById(
   }
 }
 
-export type UpdateResponse = PengaduanMasyarakat | {};
+export type UpdateResponse = Pengaduan | {};
 export async function update(
   id: string,
-  data: PengaduanMasyarakatDTO,
+  data: PengaduanDTO,
   user: UserJWTDAO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
-    let pengaduanMasyarakat = await prisma.pengaduanMasyarakat.findUnique({
+    let pengaduanMasyarakat = await prisma.pengaduan.findUnique({
       where: { id },
     });
 
     if (!pengaduanMasyarakat) return INVALID_ID_SERVICE_RESPONSE;
 
     // Update only allowed fields
-    pengaduanMasyarakat = await prisma.pengaduanMasyarakat.update({
+    pengaduanMasyarakat = await prisma.pengaduan.update({
       where: { id },
       data: {
         ...data,
@@ -168,7 +183,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     const idArray: string[] = JSON.parse(ids);
 
     idArray.forEach(async (id) => {
-      await prisma.pengaduanMasyarakat.delete({
+      await prisma.pengaduan.delete({
         where: {
           id,
         },

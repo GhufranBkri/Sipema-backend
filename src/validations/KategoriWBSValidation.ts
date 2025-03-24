@@ -8,7 +8,7 @@ import { prisma } from "$utils/prisma.utils";
 export async function validateKategoriWBSDTO(c: Context, next: Next) {
   const data: KategoriWBSDTO = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
-  const existingKategori = await prisma.kategoriWBS.findFirst({
+  const existingKategori = await prisma.kategori.findFirst({
     where: {
       nama: data.nama,
     },

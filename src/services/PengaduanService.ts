@@ -7,12 +7,12 @@ import {
 } from "$entities/Service";
 import { prisma } from "$utils/prisma.utils";
 import { Pengaduan } from "@prisma/client";
-import { PengaduanDTO } from "$entities/Pengaduan";
 import { ErrorHandler } from "$utils/errorHandler";
 import Logger from "$pkg/logger";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
 import { NotificationUtils } from "$utils/notification.utils";
+import { PengaduanDTO } from "$entities/Pengaduan";
 
 export type CreateResponse = Pengaduan | {};
 export async function create(
@@ -28,26 +28,32 @@ export async function create(
       },
     });
 
-    // Get staff members
-    const unit = await prisma.unit.findUnique({
-      where: { nama_unit: data.nameUnit },
-    });
+    // Send WhatsApp notification
 
-    const staff = await prisma.user.findMany({
-      where: {
-        unitId: unit?.id,
-        role: { in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"] },
-      },
-    });
+    // // Get staff members
+    // const unit = await prisma.unit.findUnique({
+    //   where: { nama_unit: data.unitId },
+    // });
 
-    // Send notifications to all staff members
-    for (const staffMember of staff) {
-      await NotificationUtils.sendNewComplaintNotification(
-        data,
-        staffMember.no_identitas,
-        pengaduan.id
-      );
-    }
+    // const finduserLevel = await prisma.userLevels.findUnique({
+    //   where: { id: user.userLevelId },
+    // });
+
+    // const staff = await prisma.user.findMany({
+    //   where: {
+    //     unitId: unit?.id,
+    //     userLevelId: { in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"] },
+    //   },
+    // });
+
+    // // Send notifications to all staff members
+    // for (const staffMember of staff) {
+    //   await NotificationUtils.sendNewComplaintNotification(
+    //     data,
+    //     staffMember.no_identitas,
+    //     pengaduan.id
+    //   );
+    // }
 
     return { status: true, data: pengaduan };
   } catch (error) {
@@ -76,7 +82,17 @@ export async function getAll(
     };
 
     //dosen mahasiswa
-    if (user.role === "DOSEN" || user.role === "MAHASISWA") {
+    const userLevel = await prisma.userLevels.findUnique({
+      where: {
+        id: user.userLevelId,
+      },
+    });
+
+    if (!userLevel) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    if (userLevel.name === "DOSEN" || userLevel.name === "MAHASISWA") {
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
       });
@@ -87,7 +103,7 @@ export async function getAll(
       };
     }
 
-    if (user.role === "KEPALA_PETUGAS_UNIT") {
+    if (userLevel.name === "KEPALA_PETUGAS_UNIT") {
       const unit = await prisma.unit.findFirst({
         where: {
           kepalaUnitId: user.no_identitas,
@@ -102,7 +118,7 @@ export async function getAll(
         nameUnit: unit.nama_unit,
       });
     }
-    if (user.role === "PETUGAS") {
+    if (userLevel.name === "PETUGAS") {
       const officerUnit = await prisma.unit.findFirst({
         where: {
           petugas: {
@@ -154,7 +170,11 @@ export async function getTotalCount(): Promise<
   try {
     const [totalCount, totalCountMasyarakat] = await Promise.all([
       prisma.pengaduan.count(),
-      prisma.pengaduanMasyarakat.count(),
+      prisma.pengaduan.count({
+        where: {
+          tipePengaduan: "MASYARAKAT",
+        },
+      }),
     ]);
 
     return {
@@ -205,10 +225,20 @@ export async function update(
 
     if (!Pengaduan) return INVALID_ID_SERVICE_RESPONSE;
 
+    const userLevel = await prisma.userLevels.findUnique({
+      where: {
+        id: user.userLevelId,
+      },
+    });
+
+    if (!userLevel) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
     if (
-      user.role === "PETUGAS" ||
-      user.role === "KEPALA_PETUGAS_UNIT" ||
-      user.role === "PETUGAS_SUPER"
+      userLevel.name === "PETUGAS" ||
+      userLevel.name === "KEPALA_PETUGAS_UNIT" ||
+      userLevel.name === "PETUGAS_SUPER"
     ) {
       Pengaduan = await prisma.pengaduan.update({
         where: {
@@ -219,11 +249,12 @@ export async function update(
           approvedBy: user.no_identitas,
         },
       });
+
       if (data.status) {
         await NotificationUtils.sendStatusUpdateNotification(
           Pengaduan.judul,
           Pengaduan.status,
-          Pengaduan.pelaporId,
+          Pengaduan.pelaporId || "",
           Pengaduan.id,
           user.no_identitas
         );

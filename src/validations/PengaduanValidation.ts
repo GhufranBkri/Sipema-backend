@@ -1,11 +1,10 @@
 import { Context, Next } from "hono";
 import { response_bad_request } from "$utils/response.utils";
 import { ErrorStructure, generateErrorStructure } from "./helper";
-import { Roles } from "@prisma/client";
 
-import { PengaduanDTO } from "$entities/Pengaduan";
 import { prisma } from "$utils/prisma.utils";
 import { UserJWTDAO } from "$entities/User";
+import { PengaduanDTO } from "$entities/Pengaduan";
 
 async function isDuplicatePengaduan(data: PengaduanDTO): Promise<boolean> {
   // Check for similar complaints within last 24 hours
@@ -27,7 +26,7 @@ async function isDuplicatePengaduan(data: PengaduanDTO): Promise<boolean> {
           },
         },
         {
-          pelaporId: data.pelaporId,
+          pelaporId: data.nama,
         },
         {
           createdAt: {
@@ -45,7 +44,7 @@ export async function validatePengaduanDTO(c: Context, next: Next) {
   const data: PengaduanDTO = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
   const existingUnit = await prisma.unit.findUnique({
-    where: { nama_unit: data.nameUnit },
+    where: { nama_unit: data.unitId },
   });
   const existingKategori = await prisma.kategori.findUnique({
     where: { id: data.kategoriId },
@@ -59,11 +58,11 @@ export async function validatePengaduanDTO(c: Context, next: Next) {
     invalidFields.push(
       generateErrorStructure("kategoriId", " cannot be empty")
     );
-  if (!data.nameUnit)
-    invalidFields.push(generateErrorStructure("nameUnit", " cannot be empty"));
+  if (!data.unitId)
+    invalidFields.push(generateErrorStructure("unitId", " cannot be empty"));
 
   if (!existingUnit)
-    invalidFields.push(generateErrorStructure("nameUnit", "unit not found"));
+    invalidFields.push(generateErrorStructure("unitId", "unit not found"));
 
   if (!existingKategori)
     invalidFields.push(
@@ -89,7 +88,6 @@ export async function validatePengaduanDTO(c: Context, next: Next) {
 }
 
 export async function validateUpdatePengaduanDTO(c: Context, next: Next) {
-  // const data: PengaduanDTO = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
   const user: UserJWTDAO = c.get("jwtPayload");
   const data: PengaduanDTO = await c.req.json();
@@ -100,7 +98,13 @@ export async function validateUpdatePengaduanDTO(c: Context, next: Next) {
     include: { pelapor: true },
   });
 
-  if (user.role === "DOSEN" || user.role === "MAHASISWA") {
+  const userLevel = await prisma.userLevels.findUnique({
+    where: {
+      id: user.userLevelId,
+    },
+  });
+
+  if (userLevel?.name === "DOSEN" || userLevel?.name === "MAHASISWA") {
     if (data.status) {
       invalidFields.push(
         generateErrorStructure("status", "not authorized to update status")
@@ -111,8 +115,8 @@ export async function validateUpdatePengaduanDTO(c: Context, next: Next) {
   if (!pengaduan) {
     invalidFields.push(generateErrorStructure("id", "complaint not found"));
   } else if (
-    pengaduan.pelapor.no_identitas !== user.no_identitas &&
-    (user.role === Roles.MAHASISWA || user.role === Roles.DOSEN)
+    pengaduan.pelaporId !== user.no_identitas &&
+    (userLevel?.name === "MAHASISWA" || userLevel?.name === "DOSEN")
   ) {
     invalidFields.push(
       generateErrorStructure("id", "not authorized to update this complaint")

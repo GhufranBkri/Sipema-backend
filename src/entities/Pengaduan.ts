@@ -1,17 +1,18 @@
-// src/entities/Pengaduan.ts
-
-import { Status } from "@prisma/client";
+// PengaduanMasyarakat.ts
+import { Status, TypePengaduan } from "@prisma/client";
 
 export interface PengaduanDTO {
   id: string;
   judul: string;
   deskripsi: string;
+  status: Status;
+  unitId: string;
   response: string;
   kategoriId: string;
-  pelaporId: string;
-  nameUnit: string;
-  status: Status;
-  filePendukung?: string;
+  nama: string;
+  no_telphone: string;
+  filePendukung: string;
+  tipePengaduan: TypePengaduan;
   filePetugas?: string;
   harapanPelapor?: string;
   approvedBy?: string;

@@ -1,187 +1,265 @@
-import { PrismaClient, Roles } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
 import { ulid } from "ulid";
 
 export async function seedAdmin(prisma: PrismaClient) {
-  // Check existing users for each role
-  const countAdmin = await prisma.user.count({ where: { role: Roles.ADMIN } });
-  const countTenagaKependidikan = await prisma.user.count({
-    where: { role: Roles.TENAGA_KEPENDIDIKAN },
-  });
-  const countMahasiswa = await prisma.user.count({
-    where: { role: Roles.MAHASISWA },
-  });
-  const countDosen = await prisma.user.count({ where: { role: Roles.DOSEN } });
-
-  const countKepalaPetugasUnit = await prisma.user.count({
-    where: { role: Roles.KEPALA_PETUGAS_UNIT },
-  });
-  const countPetugasSuper = await prisma.user.count({
-    where: { role: Roles.PETUGAS_SUPER },
-  });
-  const countPetugas = await prisma.user.count({
-    where: { role: Roles.PETUGAS },
-  });
-  const countKepalaWBS = await prisma.user.count({
-    where: { role: Roles.KEPALA_WBS },
-  });
   // Admin seed
-  if (countAdmin === 0) {
-    const hashedPassword = await bcrypt.hash("admin123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Admin",
-        no_identitas: "1001",
-        password: hashedPassword,
-        email: "admin@test.com",
-        role: Roles.ADMIN,
-        program_studi: "ADMIN",
+  const findAdmin = await prisma.userLevels.findUnique({
+    where: {
+      name: "ADMIN",
+    },
+  });
+
+  if (findAdmin) {
+    const countAdmin = await prisma.user.count({
+      where: {
+        userLevelId: findAdmin.id,
       },
     });
-    console.log("Admin seeded");
+    if (countAdmin === 0) {
+      const hashedPassword = await bcrypt.hash("admin123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Admin",
+          no_identitas: "1001",
+          password: hashedPassword,
+          email: "admin@test.com",
+          userLevelId: findAdmin.id,
+          program_studi: "ADMIN",
+        },
+      });
+      console.log("Admin seeded");
+    }
   }
 
   // Dosen seed
-  if (countDosen === 0) {
-    const hashedPassword = await bcrypt.hash("dosen123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Dosen",
-        no_identitas: "2002",
-        password: hashedPassword,
-        email: "dosen@test.com",
-        role: Roles.DOSEN,
-        program_studi: "Informatika",
+  const findDosen = await prisma.userLevels.findUnique({
+    where: {
+      name: "DOSEN",
+    },
+  });
+  if (findDosen) {
+    const countDosen = await prisma.user.count({
+      where: {
+        userLevelId: findDosen.id,
       },
     });
-    console.log("Dosen seeded");
+    if (countDosen === 0) {
+      const hashedPassword = await bcrypt.hash("dosen123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Dosen",
+          no_identitas: "2002",
+          password: hashedPassword,
+          email: "dosen@test.com",
+          userLevelId: findDosen.id,
+          program_studi: "Informatika",
+        },
+      });
+      console.log("Dosen seeded");
+    }
   }
 
   // Kepala WBS seed
-  if (countKepalaWBS === 0) {
-    const hashedPassword = await bcrypt.hash("kepala123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Kepala WBS",
-        no_identitas: "5002",
-        password: hashedPassword,
-        email: "kepalaWBS@test.com",
-        role: Roles.KEPALA_WBS,
-        program_studi: "KEPALA",
+  const findKepalaWBS = await prisma.userLevels.findUnique({
+    where: {
+      name: "KEPALA_WBS",
+    },
+  });
+  if (findKepalaWBS) {
+    const countKepalaWBS = await prisma.user.count({
+      where: {
+        userLevelId: findKepalaWBS.id,
       },
     });
-    console.log("Kepala WBS seeded");
+    if (countKepalaWBS === 0) {
+      const hashedPassword = await bcrypt.hash("kepala123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Kepala WBS",
+          no_identitas: "5002",
+          password: hashedPassword,
+          email: "kepalaWBS@test.com",
+          userLevelId: findKepalaWBS.id,
+          program_studi: "KEPALA",
+        },
+      });
+      console.log("Kepala WBS seeded");
+    }
   }
 
-  // Mahasiswa seed
-  if (countMahasiswa === 0) {
-    const hashedPassword = await bcrypt.hash("Mahasiswa123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Dosen",
-        no_identitas: "2003",
-        password: hashedPassword,
-        email: "mahasiswa@test.com",
-        role: Roles.MAHASISWA,
-        program_studi: "Informatika",
+  const findMahasiswa = await prisma.userLevels.findUnique({
+    where: {
+      name: "MAHASISWA",
+    },
+  });
+  if (findMahasiswa) {
+    const countMahasiswa = await prisma.user.count({
+      where: {
+        userLevelId: findMahasiswa.id,
       },
     });
-    console.log("Dosen seeded");
+    // Mahasiswa seed
+    if (countMahasiswa === 0) {
+      const hashedPassword = await bcrypt.hash("Mahasiswa123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Dosen",
+          no_identitas: "2003",
+          password: hashedPassword,
+          email: "mahasiswa@test.com",
+          userLevelId: findMahasiswa.id,
+          program_studi: "Informatika",
+        },
+      });
+      console.log("Dosen seeded");
+    }
   }
 
   // Tenaga Kependidikan seed
-  if (countTenagaKependidikan === 0) {
-    const hashedPassword = await bcrypt.hash("tendik123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Tenaga Kependidikan",
-        no_identitas: "2001",
-        password: hashedPassword,
-        email: "tendik@test.com",
-        role: Roles.TENAGA_KEPENDIDIKAN,
-        program_studi: "Administrasi",
+  const findTenagaKependidikan = await prisma.userLevels.findUnique({
+    where: {
+      name: "TENAGA_KEPENDIDIKAN",
+    },
+  });
+  if (findTenagaKependidikan) {
+    const countTenagaKependidikan = await prisma.user.count({
+      where: {
+        userLevelId: findTenagaKependidikan.id,
       },
     });
-    console.log("Tenaga Kependidikan seeded");
+    if (countTenagaKependidikan === 0) {
+      const hashedPassword = await bcrypt.hash("tendik123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Tenaga Kependidikan",
+          no_identitas: "2001",
+          password: hashedPassword,
+          email: "tendik@test.com",
+          userLevelId: findTenagaKependidikan.id,
+          program_studi: "Administrasi",
+        },
+      });
+      console.log("Tenaga Kependidikan seeded");
+    }
   }
 
   // Petugas Super seed
-  if (countPetugasSuper === 0) {
-    const hashedPassword = await bcrypt.hash("super123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Petugas Super",
-        no_identitas: "3001",
-        password: hashedPassword,
-        email: "super@test.com",
-        role: Roles.PETUGAS_SUPER,
-        program_studi: "SUPER",
+  const findPetugasSuper = await prisma.userLevels.findUnique({
+    where: {
+      name: "PETUGAS_SUPER",
+    },
+  });
+  if (findPetugasSuper) {
+    const countPetugasSuper = await prisma.user.count({
+      where: {
+        userLevelId: findPetugasSuper.id,
       },
     });
-    console.log("Petugas Super seeded");
+    if (countPetugasSuper === 0) {
+      const hashedPassword = await bcrypt.hash("super123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Petugas Super",
+          no_identitas: "3001",
+          password: hashedPassword,
+          email: "super@test.com",
+          userLevelId: findPetugasSuper.id,
+          program_studi: "SUPER",
+        },
+      });
+      console.log("Petugas Super seeded");
+    }
   }
 
   // Kepala Unit seed
-  if (countKepalaPetugasUnit === 0) {
-    const hashedPassword = await bcrypt.hash("kepala123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Kepala Unit",
-        no_identitas: "5001",
-        password: hashedPassword,
-        email: "kepala@test.com",
-        role: Roles.KEPALA_PETUGAS_UNIT,
-        program_studi: "KEPALA",
+  const findKepalaPetugasUnit = await prisma.userLevels.findUnique({
+    where: {
+      name: "KEPALA_PETUGAS_UNIT",
+    },
+  });
+  if (findKepalaPetugasUnit) {
+    const countKepalaPetugasUnit = await prisma.user.count({
+      where: {
+        userLevelId: findKepalaPetugasUnit.id,
       },
     });
+    if (countKepalaPetugasUnit === 0) {
+      const hashedPassword = await bcrypt.hash("kepala123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Kepala Unit",
+          no_identitas: "5001",
+          password: hashedPassword,
+          email: "kepala@test.com",
+          userLevelId: findKepalaPetugasUnit.id,
+          program_studi: "KEPALA",
+        },
+      });
+    }
   }
 
   // Create Unit first
-  if (countPetugas === 0) {
-    const unit = await prisma.unit.create({
-      data: {
-        id: ulid(),
-        nama_unit: "Unit TI",
-        kepalaUnitId: "5001",
-      },
-    });
-
-    await prisma.user.update({
+  const findUnit = await prisma.unit.findUnique({
+    where: {
+      nama_unit: "Unit TI",
+    },
+  });
+  if (findUnit) {
+    const findPetugas = await prisma.userLevels.findUnique({
       where: {
-        no_identitas: unit.kepalaUnitId,
-      },
-      data: {
-        unitId: unit.id,
+        name: "PETUGAS",
       },
     });
-
-    // Petugas seed with unit assignment
-    const hashedPassword = await bcrypt.hash("petugas123", 12);
-    await prisma.user.create({
-      data: {
-        id: ulid(),
-        name: "Petugas Unit TI",
-        no_identitas: "4001",
-        password: hashedPassword,
-        email: "petugas@test.com",
-        role: Roles.PETUGAS,
-        program_studi: "Teknik Informatika",
-        unit_petugas: {
-          connect: {
-            id: unit.id,
-          },
+    if (findPetugas) {
+      const countPetugas = await prisma.user.count({
+        where: {
+          userLevelId: "PETUGAS",
         },
-      },
-    });
-    console.log("Petugas and Unit seeded");
+      });
+      if (countPetugas === 0) {
+        const unit = await prisma.unit.create({
+          data: {
+            id: ulid(),
+            nama_unit: "Unit TI",
+            kepalaUnitId: "5001",
+          },
+        });
+
+        await prisma.user.update({
+          where: {
+            no_identitas: unit.kepalaUnitId,
+          },
+          data: {
+            unitId: unit.id,
+          },
+        });
+
+        // Petugas seed with unit assignment
+        const hashedPassword = await bcrypt.hash("petugas123", 12);
+        await prisma.user.create({
+          data: {
+            id: ulid(),
+            name: "Petugas Unit TI",
+            no_identitas: "4001",
+            password: hashedPassword,
+            email: "petugas@test.com",
+            userLevelId: findPetugas.id,
+            program_studi: "Teknik Informatika",
+            unitId: unit.id,
+          },
+        });
+        console.log("Petugas and Unit seeded");
+      }
+    }
   }
 
-  console.log("All roles seeding completed");
+  console.log("All user seeding completed");
 }

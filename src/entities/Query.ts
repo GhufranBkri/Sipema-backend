@@ -5,7 +5,6 @@ export interface ClauseFilters {
   [filterKey: string]: ClauseFiltersContent;
 }
 
-
 export interface StatsClauseFilters {
   [filterKey: string]: string;
 }
@@ -24,7 +23,6 @@ export interface FilteringQuery {
   cursorDirection?: string;
 }
 
-
 /*
 
 Anything Above This Comment Is Interface used in V1 Filter Query 
@@ -32,11 +30,10 @@ Please Use V2 :)
 
 */
 
-
-export interface RangedFilter{
-  key:string 
-  start:any 
-  end:any 
+export interface RangedFilter {
+  key: string;
+  start: any;
+  end: any;
 }
 
 export interface FilteringQueryV2 {
@@ -47,9 +44,8 @@ export interface FilteringQueryV2 {
   orderRule?: string;
   filters?: Record<string, any | any[] | null>;
   searchFilters?: Record<string, any | null>;
-  rangedFilters?: RangedFilter[]
+  rangedFilters?: RangedFilter[];
 }
-
 
 /*
   As part of the dynamic filtering + pagination 
@@ -61,8 +57,8 @@ export interface FilteringQueryV2 {
   Promise<ServiceResponse<PagedList<User>>>
 
 */
-export interface PagedList<T>{
-  entries: T
-  totalData: number 
-  totalPage : number
+export interface PagedList<T> {
+  entries: T;
+  totalData: number;
+  totalPage: number;
 }

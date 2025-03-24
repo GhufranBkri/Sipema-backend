@@ -122,7 +122,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     // Use transaction to ensure all operations complete or none do
     await prisma.$transaction(async (tx) => {
       // First delete all related PengaduanMasyarakat records
-      await tx.pengaduanMasyarakat.deleteMany({
+      await tx.pengaduan.deleteMany({
         where: {
           kategoriId: {
             in: idArray,

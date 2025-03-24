@@ -185,14 +185,24 @@ export async function getAll(
     usedFilters.include = {
       kepalaUnitId: false,
     };
-    if (user?.role === "ADMIN") {
+    const userLevel = await prisma.userLevels.findUnique({
+      where: {
+        id: user.userLevelId,
+      },
+    });
+
+    if (!userLevel) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    if (userLevel.name === "ADMIN") {
       usedFilters.include = {
         kepalaUnit: true,
         petugas: true,
       };
     }
 
-    if (user?.role === "KEPALA_PETUGAS_UNIT") {
+    if (userLevel.name === "KEPALA_PETUGAS_UNIT") {
       usedFilters.include = {
         kepalaUnit: true,
         petugas: true,
@@ -307,24 +317,24 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     const idArray: string[] = JSON.parse(ids);
 
     await Promise.all(
-      idArray.map(async (nama) => {
+      idArray.map(async (id) => {
         await prisma.pengaduan.deleteMany({
           where: {
-            nameUnit: nama,
+            unitId: id,
           },
         });
 
-        await prisma.pengaduanMasyarakat.deleteMany({
+        await prisma.pengaduan.deleteMany({
           where: {
-            nameUnit: nama,
+            unitId: id,
           },
         });
       })
     );
-    idArray.forEach(async (nama_unit) => {
+    idArray.forEach(async (id) => {
       await prisma.unit.delete({
         where: {
-          nama_unit,
+          id,
         },
       });
     });

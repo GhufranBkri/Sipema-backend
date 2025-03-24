@@ -22,6 +22,12 @@ enum Roles {
   KEPALA_PETUGAS_UNIT
 }
 
+
+enum TypePengaduan {
+  USER
+  MASYARAKAT
+}
+
 enum Status {
   PENDING
   PROCESS
@@ -48,12 +54,10 @@ model Notification {
   
   pengaduanId          String?
   pengaduan            Pengaduan?       @relation(fields: [pengaduanId], references: [id])
+
   
-  pengaduanMasyarakatId String?
-  pengaduanMasyarakat  PengaduanMasyarakat? @relation(fields: [pengaduanMasyarakatId], references: [id])
-  
-  pelaporanWBSId       String?
-  pelaporanWBS         PelaporanWBS?    @relation(fields: [pelaporanWBSId], references: [id])
+  pengaduanWBSId       String?
+  pengaduanWBS         PengaduanWBS?    @relation(fields: [pengaduanWBSId], references: [id])
 }
 
 model User {
@@ -66,16 +70,59 @@ model User {
   no_telphone   String?
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
-  role          Roles
-  pengaduan     Pengaduan[] @relation("pelapor")
-  pengaduanWBS  PelaporanWBS[] @relation("pelapor")
+  pengaduan     Pengaduan[] 
+  pengaduanWBS  PengaduanWBS[] @relation("pelapor")
   notifications Notification[] 
   unit_petugas  Unit?     @relation("petugas", fields: [unitId], references: [id])
   unitId        String?
   unit_kepala   Unit?     @relation("kepalaUnit")
-  petugas_wbs   PetugasWBS[]  @relation("petugasWBS")    
-  kepala_wbs    PetugasWBS? @relation("kepalaWBS")    
+  userLevelId   String
+  userLevel     UserLevels @relation(fields: [userLevelId], references: [id])
 }
+
+model UserLevels {
+  id         String       @id
+  name       String       @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  users      User[]
+  acl        Acl[]
+
+}
+
+model Features {
+  id        String   @id
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  actions Actions[]
+  acl     Acl[]
+}
+
+model Actions {
+  id          String   @id
+  name        String
+  namaFeature String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  feature Features @relation(fields: [namaFeature], references: [name])
+  @@unique([namaFeature, name])
+}
+
+model Acl {
+  id          String   @id
+  namaFeature String
+  namaAction  String
+  userLevelId String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  feature   Features   @relation(fields: [namaFeature], references: [name])
+  userLevel UserLevels @relation(fields: [userLevelId], references: [id])
+
+  @@unique([namaFeature, namaAction, userLevelId])
+}
+
 model Unit {
   id                  String                @id @default(cuid())
   nama_unit           String                @unique
@@ -83,7 +130,6 @@ model Unit {
   petugas             User[]                @relation("petugas")
   kepalaUnit          User                  @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
   kepalaUnitId        String                @unique
-  PengaduanMasyarakat PengaduanMasyarakat[]
 }
 
 model Kategori {
@@ -92,21 +138,11 @@ model Kategori {
   pengaduan           Pengaduan[]
   createdAt           DateTime              @default(now())
   updatedAt           DateTime              @updatedAt
-  PengaduanMasyarakat PengaduanMasyarakat[]
+  pengaduanWBS   PengaduanWBS[]
+  isWBS               Boolean               @default(false)
 }
 
-model PetugasWBS {
-  id            String    @id @default(cuid())
-  kepalaWnBS     User      @relation("kepalaWBS", fields: [kepalaWBSId], references: [no_identitas])
-  kepalaWBSId   String    @unique  // Tetap unique karena hanya ada 1 kepala
-  petugas       User      @relation("petugasWBS", fields: [petugasId], references: [no_identitas])
-  petugasId     String    // Tidak unique agar bisa ada beberapa petugas
-  isActive      Boolean   @default(true)  // Tambahan untuk status aktif petugas
-  pelaporanWBS  PelaporanWBS[]
-}
-
-// test
-model PelaporanWBS {
+model PengaduanWBS {
   id             String       @id  @default(cuid())
   judul          String
   deskripsi      String
@@ -115,10 +151,8 @@ model PelaporanWBS {
   lokasi         String
   kategoriId     String 
   unit           String
-  kategori       KategoriWBS  @relation(fields: [kategoriId], references: [id])
+  kategori       Kategori  @relation(fields: [kategoriId], references: [id])
   pelaporId      String
-  petugasWBS     PetugasWBS? @relation(fields: [petugasWBSId], references: [id])
-  petugasWBSId   String?
   pelapor        User      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
   status         Status     @default(PENDING)
   notfications   Notification[]
@@ -130,20 +164,17 @@ model PelaporanWBS {
   filePetugas   String?
 }
 
-model KategoriWBS {
-  id          String         @id @default(cuid())
-  nama        String         @unique
-  deskripsi   String?
-  pelaporan   PelaporanWBS[]
-}
 
-model PengaduanMasyarakat {
+
+model Pengaduan {
   id            String   @id @default(cuid())
   judul         String
   deskripsi     String
   status        Status   @default(PENDING)
-  unit          Unit     @relation(fields: [nameUnit], references: [nama_unit])
-  nameUnit      String
+  unit          Unit     @relation(fields: [unitId], references: [id])
+  pelaporId    String?
+  pelapor      User?     @relation(fields: [pelaporId], references: [no_identitas])
+  unitId      String
   response      String?
   kategori      Kategori @relation(fields: [kategoriId], references: [id])
   kategoriId    String
@@ -153,28 +184,8 @@ model PengaduanMasyarakat {
   filePendukung String?
   notfications  Notification[]
   approvedBy    String?
+  tipePengaduan TypePengaduan
   no_telphone   String
   filePetugas   String?
   harapan_pelapor String?
-}
-
-model Pengaduan {
-  id            String   @id @default(cuid())
-  judul         String
-  deskripsi     String
-  kategoriId    String
-  nameUnit      String
-  pelaporId     String
-  status        Status   @default(PENDING)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  kategori      Kategori @relation(fields: [kategoriId], references: [id])
-  pelapor       User     @relation("pelapor", fields: [pelaporId], references: [no_identitas])
-  unit          Unit     @relation(fields: [nameUnit], references: [nama_unit])
-  notfications  Notification[]
-  approvedBy    String?
-  harapan_pelapor String? 
-  filePendukung String?
-  response      String?
-  filePetugas   String?
 }

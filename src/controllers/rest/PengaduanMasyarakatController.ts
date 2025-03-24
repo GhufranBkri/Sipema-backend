@@ -6,12 +6,12 @@ import {
 } from "$utils/response.utils";
 import { FilteringQueryV2 } from "$entities/Query";
 import { checkFilteringQueryV2 } from "$controllers/helpers/CheckFilteringQuery";
-import { PengaduanMasyarakatDTO } from "$entities/PengaduanMasyarakat";
 import { UserJWTDAO } from "$entities/User";
+import { PengaduanDTO } from "$entities/Pengaduan";
 
 // PengaduanMasyarakatController.ts
 export async function create(c: Context): Promise<TypedResponse> {
-  const data: PengaduanMasyarakatDTO = await c.req.json();
+  const data: PengaduanDTO = await c.req.json();
 
   // Langsung gunakan entity tanpa konversi
   const serviceResponse = await PengaduanMasyarakatService.create(data);
@@ -61,7 +61,7 @@ export async function getById(c: Context): Promise<TypedResponse> {
 }
 
 export async function update(c: Context): Promise<TypedResponse> {
-  const data: PengaduanMasyarakatDTO = await c.req.json();
+  const data: PengaduanDTO = await c.req.json();
   const id = c.req.param("id");
   const user: UserJWTDAO = c.get("jwtPayload");
 

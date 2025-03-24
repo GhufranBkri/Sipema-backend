@@ -24,8 +24,19 @@ export async function create(
     if (existingUser)
       return ConflictResponse("Nomor identitas sudah terdaftar");
 
+    const finduserLevel = await prisma.userLevels.findUnique({
+      where: {
+        name: data.userLevelName,
+      },
+    });
+
+    if (!finduserLevel) return INVALID_ID_SERVICE_RESPONSE;
+
     const user = await prisma.user.create({
-      data,
+      data: {
+        ...data,
+        userLevelId: finduserLevel.id,
+      },
     });
 
     return {
@@ -143,13 +154,14 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    await Promise.all(idArray.map(async (no_identitas) => {
+    await Promise.all(
+      idArray.map(async (no_identitas) => {
         await prisma.pengaduan.deleteMany({
           where: {
             pelaporId: no_identitas,
           },
         });
-        await prisma.pelaporanWBS.deleteMany({
+        await prisma.pengaduanWBS.deleteMany({
           where: {
             pelaporId: no_identitas,
           },

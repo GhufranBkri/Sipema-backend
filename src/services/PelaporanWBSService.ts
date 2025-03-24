@@ -6,13 +6,14 @@ import {
 } from "$entities/Service";
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
-import { PelaporanWBS } from "@prisma/client";
+
 import { PelaporanWBSDTO } from "$entities/PelaporanWBS";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
 import { NotificationUtils } from "$utils/notification.utils";
+import { PengaduanWBS } from "@prisma/client";
 
-export type CreateResponse = PelaporanWBS | {};
+export type CreateResponse = PengaduanWBS | {};
 export async function create(
   user: UserJWTDAO,
   data: PelaporanWBSDTO
@@ -23,7 +24,7 @@ export async function create(
       data.tanggalKejadian = new Date(data.tanggalKejadian);
     }
 
-    const pelaporanWBS = await prisma.pelaporanWBS.create({
+    const pelaporanWBS = await prisma.pengaduanWBS.create({
       data: {
         ...data,
         pelaporId: user.no_identitas,
@@ -32,7 +33,9 @@ export async function create(
 
     const staff = await prisma.user.findMany({
       where: {
-        role: { in: ["KEPALA_WBS", "PETUGAS_WBS"] },
+        userLevel: {
+          name: { in: ["KEPALA_WBS", "PETUGAS_WBS"] },
+        },
       },
     });
 
@@ -54,7 +57,7 @@ export async function create(
   }
 }
 
-export type GetAllResponse = PagedList<PelaporanWBS[]> | {};
+export type GetAllResponse = PagedList<PengaduanWBS[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
   user: UserJWTDAO
@@ -68,15 +71,25 @@ export async function getAll(
       kategori: true,
     };
 
+    const userLevel = await prisma.userLevels.findUnique({
+      where: {
+        id: user.userLevelId,
+      },
+    });
+
+    if (!userLevel) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
     // dosen or pelapor
-    if (user.role === "DOSEN") {
+    if (userLevel.name === "DOSEN") {
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
       });
     }
 
     // petugasWBS
-    if (user.role === "PETUGAS_WBS" || user.role === "KEPALA_WBS") {
+    if (userLevel.name === "PETUGAS_WBS" || userLevel.name === "KEPALA_WBS") {
       usedFilters.include = {
         pelapor: false,
         pelaporId: false,
@@ -85,8 +98,8 @@ export async function getAll(
     }
 
     const [pelaporanWBS, totalData] = await Promise.all([
-      prisma.pelaporanWBS.findMany(usedFilters),
-      prisma.pelaporanWBS.count({
+      prisma.pengaduanWBS.findMany(usedFilters),
+      prisma.pengaduanWBS.count({
         where: usedFilters.where,
       }),
     ]);
@@ -109,12 +122,12 @@ export async function getAll(
   }
 }
 
-export type GetByIdResponse = PelaporanWBS | {};
+export type GetByIdResponse = PengaduanWBS | {};
 export async function getById(
   id: string
 ): Promise<ServiceResponse<GetByIdResponse>> {
   try {
-    let pelaporanWBS = await prisma.pelaporanWBS.findUnique({
+    let pelaporanWBS = await prisma.pengaduanWBS.findUnique({
       where: {
         id,
       },
@@ -135,14 +148,14 @@ export async function getById(
   }
 }
 
-export type UpdateResponse = PelaporanWBS | {};
+export type UpdateResponse = PengaduanWBS | {};
 export async function update(
   id: string,
   data: PelaporanWBSDTO,
   user: UserJWTDAO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
-    let pelaporanWBS = await prisma.pelaporanWBS.findUnique({
+    let pelaporanWBS = await prisma.pengaduanWBS.findUnique({
       where: {
         id,
       },
@@ -150,12 +163,22 @@ export async function update(
 
     if (!pelaporanWBS) return INVALID_ID_SERVICE_RESPONSE;
 
+    const userLevel = await prisma.userLevels.findUnique({
+      where: {
+        id: user.userLevelId,
+      },
+    });
+
+    if (!userLevel) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
     if (
-      user.role === "PETUGAS_WBS" ||
-      user.role === "KEPALA_WBS" ||
-      user.role === "PETUGAS_SUPER"
+      userLevel.name === "PETUGAS_WBS" ||
+      userLevel.name === "KEPALA_WBS" ||
+      userLevel.name === "PETUGAS_SUPER"
     ) {
-      pelaporanWBS = await prisma.pelaporanWBS.update({
+      pelaporanWBS = await prisma.pengaduanWBS.update({
         where: {
           id,
         },
@@ -174,7 +197,7 @@ export async function update(
     }
 
     {
-      pelaporanWBS = await prisma.pelaporanWBS.update({
+      pelaporanWBS = await prisma.pengaduanWBS.update({
         where: {
           id,
         },
@@ -197,7 +220,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     const idArray: string[] = JSON.parse(ids);
 
     idArray.forEach(async (id) => {
-      await prisma.pelaporanWBS.delete({
+      await prisma.pengaduanWBS.delete({
         where: {
           id,
         },

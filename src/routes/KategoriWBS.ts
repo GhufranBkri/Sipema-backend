@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import * as KategoriWBSController from "$controllers/rest/KategoriWBSController";
 import { validateKategoriWBSDTO } from "$validations/KategoriWBSValidation";
 import * as authMiddleware from "$middlewares/authMiddleware";
-import { Roles } from "@prisma/client";
 
 const KategoriWBSRoutes = new Hono();
 
@@ -20,23 +19,24 @@ KategoriWBSRoutes.get(
 
 KategoriWBSRoutes.post(
   "/",
-  authMiddleware.checkRole([Roles.ADMIN]),
   authMiddleware.checkJwt,
+  authMiddleware.checkAccess("KATEGORI_WBS", "create"),
   validateKategoriWBSDTO,
   KategoriWBSController.create
 );
 
 KategoriWBSRoutes.put(
   "/:id",
-  authMiddleware.checkRole([Roles.ADMIN]),
   authMiddleware.checkJwt,
+  authMiddleware.checkAccess("KATEGORI_WBS", "update"),
   KategoriWBSController.update
 );
 
 KategoriWBSRoutes.delete(
   "/",
-  authMiddleware.checkRole([Roles.ADMIN]),
+  // authMiddleware.checkRole([Roles.ADMIN]),
   authMiddleware.checkJwt,
+  authMiddleware.checkAccess("KATEGORI_WBS", "delete"),
   KategoriWBSController.deleteByIds
 );
 

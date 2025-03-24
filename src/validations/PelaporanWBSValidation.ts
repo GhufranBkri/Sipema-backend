@@ -37,7 +37,7 @@ export async function validatePelaporanWBSDTO(c: Context, next: Next) {
 
   // Validate kategoriId exists
   if (data.kategoriId) {
-    const kategori = await prisma.kategoriWBS.findUnique({
+    const kategori = await prisma.kategori.findUnique({
       where: { id: data.kategoriId },
     });
     if (!kategori) {
@@ -49,7 +49,7 @@ export async function validatePelaporanWBSDTO(c: Context, next: Next) {
 
   // Check for duplicate complaint
   if (invalidFields.length === 0) {
-    const isDuplicate = await prisma.pelaporanWBS.findFirst({
+    const isDuplicate = await prisma.pengaduanWBS.findFirst({
       where: {
         AND: [
           {
@@ -109,9 +109,13 @@ export async function validatePelaporanWBSUpdateDTO(c: Context, next: Next) {
   const invalidFields: ErrorStructure[] = [];
   const user: UserJWTDAO = c.get("jwtPayload");
 
+  const finduserLevel = await prisma.userLevels.findUnique({
+    where: { name: "DOSEN" },
+  });
+
   const id = c.req.param("id");
 
-  const pelaporan = await prisma.pelaporanWBS.findUnique({
+  const pelaporan = await prisma.pengaduanWBS.findUnique({
     where: { id },
     include: { pelapor: true },
   });
@@ -120,14 +124,14 @@ export async function validatePelaporanWBSUpdateDTO(c: Context, next: Next) {
     invalidFields.push(generateErrorStructure("id", "complaint not found"));
   } else if (
     pelaporan.pelapor.no_identitas !== user.no_identitas &&
-    user.role === "DOSEN"
+    user.userLevelId === finduserLevel?.id
   ) {
     invalidFields.push(
       generateErrorStructure("id", "not authorized to update this complaint")
     );
   }
 
-  if (user.role === "DOSEN") {
+  if (user.userLevelId === finduserLevel?.id) {
     if (data.status) {
       invalidFields.push(
         generateErrorStructure("status", "not authorized to update status")
@@ -135,22 +139,22 @@ export async function validatePelaporanWBSUpdateDTO(c: Context, next: Next) {
     }
   }
 
-  if (
-    user.role === "KEPALA_WBS" ||
-    user.role === "PETUGAS_WBS" ||
-    user.role === "PETUGAS_SUPER"
-  ) {
-    const allowedFields = ["status", "response"];
-    const updatedFields = Object.keys(data);
+  // if (
+  //   user.role === "KEPALA_WBS" ||
+  //   user.role === "PETUGAS_WBS" ||
+  //   user.role === "PETUGAS_SUPER"
+  // ) {
+  //   const allowedFields = ["status", "response"];
+  //   const updatedFields = Object.keys(data);
 
-    for (const field of updatedFields) {
-      if (!allowedFields.includes(field)) {
-        invalidFields.push(
-          generateErrorStructure(field, `not allowed to update ${field}`)
-        );
-      }
-    }
-  }
+  //   for (const field of updatedFields) {
+  //     if (!allowedFields.includes(field)) {
+  //       invalidFields.push(
+  //         generateErrorStructure(field, `not allowed to update ${field}`)
+  //       );
+  //     }
+  //   }
+  // }
   // Return error response if validation fails
   if (invalidFields.length !== 0) {
     return response_bad_request(c, "Validation Error", invalidFields);

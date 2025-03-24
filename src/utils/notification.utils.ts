@@ -2,8 +2,8 @@ import { randomUUID } from "crypto";
 import { PengaduanNotifications } from "./notif_tmplt.utils";
 import { NotificationDTO } from "$entities/Notification";
 import * as NotificationService from "$services/NotificationService";
-import { PengaduanDTO } from "$entities/Pengaduan";
 import { prisma } from "./prisma.utils";
+import { PengaduanDTO } from "$entities/Pengaduan";
 
 /**
  * Utility functions for sending notifications
@@ -18,8 +18,18 @@ export const NotificationUtils = {
     pengaduanId: string
   ) => {
     try {
+      const getUnit = await prisma.unit.findUnique({
+        where: { id: data.unitId },
+      });
+
+      if (!getUnit) {
+        throw new Error("Unit not found");
+      }
       // Get notification template
-      const template = PengaduanNotifications.newComplaint(data);
+      const template = PengaduanNotifications.newComplaint(
+        getUnit.nama_unit,
+        data.judul
+      );
 
       // Build complete notification object
       const notification: NotificationDTO = {
@@ -139,7 +149,7 @@ export const NotificationUtils = {
       // Send the notification for user
       const notifications = await prisma.notification.findMany({
         where: {
-          pelaporanWBSId: pengaduanId,
+          pengaduanWBSId: pengaduanId,
           type: "NEW_REPORT",
         },
       });
@@ -167,8 +177,18 @@ export const NotificationUtils = {
    */
   sendResolvedNotification: async (data: PengaduanDTO, userId: string) => {
     try {
+      const getUnit = await prisma.unit.findUnique({
+        where: { id: data.unitId },
+      });
+
+      if (!getUnit) {
+        throw new Error("Unit not found");
+      }
       // Get template (only has title and message)
-      const template = PengaduanNotifications.resolved(data);
+      const template = PengaduanNotifications.resolved(
+        data.judul,
+        getUnit?.nama_unit
+      );
 
       // Build complete notification
       const notification: NotificationDTO = {

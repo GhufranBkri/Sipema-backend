@@ -10,35 +10,38 @@ PengaduanRoutes.get("/count", PengaduanController.getTotalCount);
 PengaduanRoutes.get(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS",
-    "PETUGAS_SUPER",
-    "KEPALA_PETUGAS_UNIT",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-    "MAHASISWA",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN", "read"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS",
+  //   "PETUGAS_SUPER",
+  //   "KEPALA_PETUGAS_UNIT",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  //   "MAHASISWA",
+  // ]),
   PengaduanController.getAll
 );
 
 PengaduanRoutes.get(
   "/:id",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS",
-    "PETUGAS_SUPER",
-    "KEPALA_PETUGAS_UNIT",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-    "MAHASISWA",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN", "read"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS",
+  //   "PETUGAS_SUPER",
+  //   "KEPALA_PETUGAS_UNIT",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  //   "MAHASISWA",
+  // ]),
   PengaduanController.getById
 );
 
 PengaduanRoutes.post(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole(["DOSEN", "TENAGA_KEPENDIDIKAN", "MAHASISWA"]),
+  authMiddleware.checkAccess("PENGADUAN", "create"),
+  // authMiddleware.checkRole(["DOSEN", "TENAGA_KEPENDIDIKAN", "MAHASISWA"]),
   pengaudanValidation.validatePengaduanDTO,
   PengaduanController.create
 );
@@ -46,14 +49,15 @@ PengaduanRoutes.post(
 PengaduanRoutes.put(
   "/:id",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS",
-    "PETUGAS_SUPER",
-    "KEPALA_PETUGAS_UNIT",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-    "MAHASISWA",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN", "update"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS",
+  //   "PETUGAS_SUPER",
+  //   "KEPALA_PETUGAS_UNIT",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  //   "MAHASISWA",
+  // ]),
   pengaudanValidation.validateUpdatePengaduanDTO,
   PengaduanController.update
 );
@@ -61,14 +65,15 @@ PengaduanRoutes.put(
 PengaduanRoutes.delete(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS",
-    "PETUGAS_SUPER",
-    "KEPALA_PETUGAS_UNIT",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-    "MAHASISWA",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN", "delete"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS",
+  //   "PETUGAS_SUPER",
+  //   "KEPALA_PETUGAS_UNIT",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  //   "MAHASISWA",
+  // ]),
   PengaduanController.deleteByIds
 );
 

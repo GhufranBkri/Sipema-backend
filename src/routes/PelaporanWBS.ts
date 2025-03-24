@@ -8,33 +8,36 @@ const PelaporanWBSRoutes = new Hono();
 PelaporanWBSRoutes.get(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS_WBS",
-    "KEPALA_WBS",
-    "PETUGAS_SUPER",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN_WBS", "read"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS_WBS",
+  //   "KEPALA_WBS",
+  //   "PETUGAS_SUPER",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  // ]),
   PelaporanWBSController.getAll
 );
 
 PelaporanWBSRoutes.get(
   "/:id",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS_WBS",
-    "KEPALA_WBS",
-    "PETUGAS_SUPER",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN_WBS", "read"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS_WBS",
+  //   "KEPALA_WBS",
+  //   "PETUGAS_SUPER",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  // ]),
   PelaporanWBSController.getById
 );
 
 PelaporanWBSRoutes.post(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole(["DOSEN", "TENAGA_KEPENDIDIKAN"]),
+  authMiddleware.checkAccess("PENGADUAN_WBS", "create"),
+  // authMiddleware.checkRole(["DOSEN", "TENAGA_KEPENDIDIKAN"]),
   pengaudanValidation.validatePelaporanWBSDTO,
   PelaporanWBSController.create
 );
@@ -42,13 +45,14 @@ PelaporanWBSRoutes.post(
 PelaporanWBSRoutes.put(
   "/:id",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS_WBS",
-    "KEPALA_WBS",
-    "PETUGAS_SUPER",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN_WBS", "update"),
+  // authMiddleware.checkRole([
+  //   "PETUGAS_WBS",
+  //   "KEPALA_WBS",
+  //   "PETUGAS_SUPER",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  // ]),
   pengaudanValidation.validatePelaporanWBSUpdateDTO,
   PelaporanWBSController.update
 );
@@ -56,13 +60,15 @@ PelaporanWBSRoutes.put(
 PelaporanWBSRoutes.delete(
   "/",
   authMiddleware.checkJwt,
-  authMiddleware.checkRole([
-    "PETUGAS_WBS",
-    "KEPALA_WBS",
-    "PETUGAS_SUPER",
-    "DOSEN",
-    "TENAGA_KEPENDIDIKAN",
-  ]),
+  authMiddleware.checkAccess("PENGADUAN_WBS", "delete"),
+
+  // authMiddleware.checkRole([
+  //   "PETUGAS_WBS",
+  //   "KEPALA_WBS",
+  //   "PETUGAS_SUPER",
+  //   "DOSEN",
+  //   "TENAGA_KEPENDIDIKAN",
+  // ]),
   PelaporanWBSController.deleteByIds
 );
 

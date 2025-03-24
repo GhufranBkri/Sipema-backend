@@ -6,39 +6,43 @@ import {
 } from "$entities/Service";
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
-import { KategoriWBS } from "@prisma/client";
-import { KategoriWBSDTO } from "$entities/KategoriWBS";
-import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
+import { Kategori } from "@prisma/client";
 
-export type CreateResponse = KategoriWBS | {};
+import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
+import { KategoriDTO } from "$entities/Kategori";
+
+export type CreateResponse = Kategori | {};
 export async function create(
-  data: KategoriWBSDTO
+  data: KategoriDTO
 ): Promise<ServiceResponse<CreateResponse>> {
   try {
-    const KategoriWBS = await prisma.kategoriWBS.create({
-      data,
+    const kategori = await prisma.kategori.create({
+      data: {
+        ...data,
+        isWBS: true,
+      },
     });
 
     return {
       status: true,
-      data: KategoriWBS,
+      data: kategori,
     };
   } catch (err) {
-    Logger.error(`KategoriWBSService.create : ${err}`);
+    Logger.error(`kategoriService.create : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
 
-export type GetAllResponse = PagedList<KategoriWBS[]> | {};
+export type GetAllResponse = PagedList<Kategori[]> | {};
 export async function getAll(
   filters: FilteringQueryV2
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
-    const [KategoriWBS, totalData] = await Promise.all([
-      prisma.kategoriWBS.findMany(usedFilters),
-      prisma.kategoriWBS.count({
+    const [kategori, totalData] = await Promise.all([
+      prisma.kategori.findMany(usedFilters),
+      prisma.kategori.count({
         where: usedFilters.where,
       }),
     ]);
@@ -50,55 +54,55 @@ export async function getAll(
     return {
       status: true,
       data: {
-        entries: KategoriWBS,
+        entries: kategori,
         totalData,
         totalPage,
       },
     };
   } catch (err) {
-    Logger.error(`KategoriWBSService.getAll : ${err} `);
+    Logger.error(`kategoriService.getAll : ${err} `);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
 
-export type GetByIdResponse = KategoriWBS | {};
+export type GetByIdResponse = Kategori | {};
 export async function getById(
   id: string
 ): Promise<ServiceResponse<GetByIdResponse>> {
   try {
-    let KategoriWBS = await prisma.kategoriWBS.findUnique({
+    let kategori = await prisma.kategori.findUnique({
       where: {
         id,
       },
     });
 
-    if (!KategoriWBS) return INVALID_ID_SERVICE_RESPONSE;
+    if (!kategori) return INVALID_ID_SERVICE_RESPONSE;
 
     return {
       status: true,
-      data: KategoriWBS,
+      data: kategori,
     };
   } catch (err) {
-    Logger.error(`KategoriWBSService.getById : ${err}`);
+    Logger.error(`kategoriService.getById : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
 
-export type UpdateResponse = KategoriWBS | {};
+export type UpdateResponse = Kategori | {};
 export async function update(
   id: string,
-  data: KategoriWBSDTO
+  data: KategoriDTO
 ): Promise<ServiceResponse<UpdateResponse>> {
   try {
-    let KategoriWBS = await prisma.kategoriWBS.findUnique({
+    let kategori = await prisma.kategori.findUnique({
       where: {
         id,
       },
     });
 
-    if (!KategoriWBS) return INVALID_ID_SERVICE_RESPONSE;
+    if (!kategori) return INVALID_ID_SERVICE_RESPONSE;
 
-    KategoriWBS = await prisma.kategoriWBS.update({
+    kategori = await prisma.kategori.update({
       where: {
         id,
       },
@@ -107,10 +111,10 @@ export async function update(
 
     return {
       status: true,
-      data: KategoriWBS,
+      data: kategori,
     };
   } catch (err) {
-    Logger.error(`KategoriWBSService.update : ${err}`);
+    Logger.error(`kategoriService.update : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
@@ -120,7 +124,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     const idArray: string[] = JSON.parse(ids);
 
     idArray.forEach(async (id) => {
-      await prisma.kategoriWBS.delete({
+      await prisma.kategori.delete({
         where: {
           id,
         },
@@ -132,7 +136,7 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
       data: {},
     };
   } catch (err) {
-    Logger.error(`KategoriWBSService.deleteByIds : ${err}`);
+    Logger.error(`kategoriService.deleteByIds : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }

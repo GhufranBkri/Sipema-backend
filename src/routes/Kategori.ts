@@ -1,32 +1,35 @@
-
-import { Hono } from "hono"
-import * as KategoriController from "$controllers/rest/KategoriController"
+import { Hono } from "hono";
+import * as KategoriController from "$controllers/rest/KategoriController";
 import * as AuthMiddleware from "$middlewares/authMiddleware";
 import * as KategoriValidation from "$validations/KategoriValidation";
 
 const KategoriRoutes = new Hono();
 
+KategoriRoutes.get("/", KategoriController.getAll);
 
-KategoriRoutes.get("/",
-    KategoriController.getAll
-)
+KategoriRoutes.get("/:id", KategoriController.getById);
 
+KategoriRoutes.post(
+  "/",
+  AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("KATEGORI", "create"),
+  KategoriValidation.validateKategoriDTO,
+  KategoriController.create
+);
 
-KategoriRoutes.get("/:id",
-    KategoriController.getById
-)
+KategoriRoutes.put(
+  "/:id",
+  AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("KATEGORI", "update"),
+  KategoriController.update
+);
 
+KategoriRoutes.delete(
+  "/",
+  AuthMiddleware.checkAccess("KATEGORI", "delete"),
+  KategoriValidation.deleteValidationKatergori,
+  AuthMiddleware.checkJwt,
+  KategoriController.deleteByIds
+);
 
-KategoriRoutes.post("/",
-    AuthMiddleware.checkJwt, KategoriValidation.validateKategoriDTO, KategoriController.create
-)
-
-KategoriRoutes.put("/:id",
-    AuthMiddleware.checkJwt, KategoriController.update
-)
-
-KategoriRoutes.delete("/",
-    KategoriValidation.deleteValidationKatergori, AuthMiddleware.checkJwt, KategoriController.deleteByIds
-)
-
-export default KategoriRoutes
+export default KategoriRoutes;
