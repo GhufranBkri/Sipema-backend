@@ -9,7 +9,6 @@ import {
 import {
   BadRequestWithMessage,
   INTERNAL_SERVER_ERROR_SERVICE_RESPONSE,
-  INVALID_ID_SERVICE_RESPONSE,
   ServiceResponse,
 } from "$entities/Service";
 import { prisma } from "$utils/prisma.utils";
@@ -83,21 +82,29 @@ export async function register(
   data: UserRegisterDTO
 ): Promise<ServiceResponse<any>> {
   try {
-    data.password = await bcrypt.hash(data.password, 12);
+    const hashedPassword = await bcrypt.hash(data.password, 12);
 
     const finduserLevel = await prisma.userLevels.findUnique({
       where: {
-        id: data.userLevelName,
+        name: data.userLevelName,
       },
     });
 
     if (!finduserLevel) {
-      return INVALID_ID_SERVICE_RESPONSE;
+      return BadRequestWithMessage("Invalid userLevelName!");
     }
+
     const newUser = await prisma.user.create({
       data: {
-        ...data,
+        email: data.email,
+        password: hashedPassword,
+        name: data.name,
+        no_identitas: data.no_identitas,
+        program_studi: data.program_studi || null,
         userLevelId: finduserLevel.id,
+      },
+      include: {
+        userLevel: true,
       },
     });
 
