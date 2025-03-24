@@ -36,6 +36,12 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
+    usedFilters.where.isWBS = false;
+
+    usedFilters.include = {
+      isWBS: false,
+    };
+
     const [kategori, totalData] = await Promise.all([
       prisma.kategori.findMany(usedFilters),
       prisma.kategori.count({
