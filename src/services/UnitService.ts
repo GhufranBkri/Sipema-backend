@@ -177,55 +177,57 @@ export async function deletePetugasByIds(
 export type GetAllResponse = PagedList<Unit[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
-  user: UserJWTDAO
+  user?: UserJWTDAO
 ): Promise<ServiceResponse<GetAllResponse>> {
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
+    // Default include settings for public access
     usedFilters.include = {
+      kepalaUnit: false,
+      petugas: false,
       kepalaUnitId: false,
     };
-    const userLevel = await prisma.userLevels.findUnique({
-      where: {
-        id: user.userLevelId,
-      },
-    });
 
-    if (userLevel?.name === "ADMIN") {
-      usedFilters.include = {
-        kepalaUnit: true,
-        petugas: true,
-      };
+    // Only proceed with user-specific includes if user is authenticated
+    if (user?.userLevelId) {
+      const userLevel = await prisma.userLevels.findUnique({
+        where: {
+          id: user.userLevelId,
+        },
+      });
+
+      // Enhanced includes for admin and kepala petugas
+      if (
+        userLevel?.name === "ADMIN" ||
+        userLevel?.name === "KEPALA_PETUGAS_UNIT"
+      ) {
+        usedFilters.include = {
+          kepalaUnit: true,
+          petugas: true,
+        };
+      }
     }
 
-    if (userLevel?.name === "KEPALA_PETUGAS_UNIT") {
-      usedFilters.include = {
-        kepalaUnit: true,
-        petugas: true,
-      };
-    }
-
-    const [Unit, totalData] = await Promise.all([
+    const [units, totalData] = await Promise.all([
       prisma.unit.findMany(usedFilters),
       prisma.unit.count({
         where: usedFilters.where,
       }),
     ]);
 
-    let totalPage = 1;
-    if (totalData > usedFilters.take)
-      totalPage = Math.ceil(totalData / usedFilters.take);
+    const totalPage = Math.max(1, Math.ceil(totalData / usedFilters.take));
 
     return {
       status: true,
       data: {
-        entries: Unit,
+        entries: units,
         totalData,
         totalPage,
       },
     };
   } catch (err) {
-    Logger.error(`unitService.getAll : ${err} `);
+    Logger.error(`unitService.getAll : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }

@@ -18,8 +18,8 @@ export async function validatePengaduanMasyarakatDTO(c: Context, next: Next) {
     invalidFields.push(generateErrorStructure("kategoriId", "cannot be empty"));
   if (!data.nama)
     invalidFields.push(generateErrorStructure("nama", "cannot be empty"));
-  if (!data.nameUnit)
-    invalidFields.push(generateErrorStructure("nameUnit", "cannot be empty"));
+  if (!data.unitId)
+    invalidFields.push(generateErrorStructure("unitId", "cannot be empty"));
   if (!data.no_telphone)
     invalidFields.push(
       generateErrorStructure("no_telphone", "cannot be empty")
@@ -37,11 +37,11 @@ export async function validatePengaduanMasyarakatDTO(c: Context, next: Next) {
 
   if (data.nameUnit) {
     const unit = await prisma.unit.findUnique({
-      where: { nama_unit: String(data.nameUnit) },
+      where: { id: String(data.unitId) },
     });
     if (!unit)
       invalidFields.push(
-        generateErrorStructure("nameUnit", "is not valid. Unit not found")
+        generateErrorStructure("unitId", "is not valid. Unit not found")
       );
   }
 

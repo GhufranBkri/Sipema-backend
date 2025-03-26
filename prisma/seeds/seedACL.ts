@@ -62,6 +62,13 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     ],
   },
 
+  ADMIN: {
+    permissions: [
+      { subject: "UNIT", action: ["read", "create", "update", "delete"] },
+      { subject: "KATEGORI", action: ["read", "create", "update", "delete"] },
+    ],
+  },
+
   MAHASISWA: {
     permissions: [
       { subject: "PENGADUAN", action: ["read", "create", "update", "delete"] },
@@ -113,14 +120,14 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
 export async function seedAcl(prisma: PrismaClient): Promise<void> {
   try {
     // Check if ACL entries already exist
-    const existingFeatures = await prisma.features.count();
-    const existingActions = await prisma.actions.count();
-    const existingAcl = await prisma.acl.count();
+    // const existingFeatures = await prisma.features.count();
+    // const existingActions = await prisma.actions.count();
+    // const existingAcl = await prisma.acl.count();
 
-    if (existingFeatures > 0 && existingActions > 0 && existingAcl > 0) {
-      console.log("ℹ️ ACL data already exists, skipping seed");
-      return;
-    }
+    // if (existingFeatures > 0 && existingActions > 0 && existingAcl > 0) {
+    //   console.log("ℹ️ ACL data already exists, skipping seed");
+    //   return;
+    // }
 
     // If no existing data, proceed with seeding
     await seedAdminPermissions(prisma);
