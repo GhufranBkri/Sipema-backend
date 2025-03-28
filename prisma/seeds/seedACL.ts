@@ -15,41 +15,41 @@ interface PermissionMap {
   [key: string]: UserLevelPermission;
 }
 
-// Constants
-const ADMIN_PERMISSIONS: Permission[] = [
-  {
-    subject: "USER_MANAGEMENT",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "ROLE_MANAGEMENT",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "ACL",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "PENGADUAN",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "PENGADUAN_WBS",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "UNIT",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "KATEGORI",
-    action: ["read", "create", "update", "delete"],
-  },
-  {
-    subject: "KATEGORI_WBS",
-    action: ["read", "create", "update", "delete"],
-  },
-];
+// // Constants
+// const ADMIN_PERMISSIONS: Permission[] = [
+//   {
+//     subject: "USER_MANAGEMENT",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "ROLE_MANAGEMENT",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "ACL",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "PENGADUAN",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "PENGADUAN_WBS",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "UNIT",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "KATEGORI",
+//     action: ["read", "create", "update", "delete"],
+//   },
+//   {
+//     subject: "KATEGORI_WBS",
+//     action: ["read", "create", "update", "delete"],
+//   },
+// ];
 
 const USER_LEVEL_PERMISSIONS: PermissionMap = {
   TENAGA_KEPENDIDIKAN: {
@@ -66,6 +66,15 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     permissions: [
       { subject: "UNIT", action: ["read", "create", "update", "delete"] },
       { subject: "KATEGORI", action: ["read", "create", "update", "delete"] },
+      {
+        subject: "USER_MANAGEMENT",
+        action: ["read", "create", "update", "delete"],
+      },
+      {
+        subject: "ROLE_MANAGEMENT",
+        action: ["read", "create", "update", "delete"],
+      },
+      { subject: "ACL", action: ["read", "create", "delete"] },
     ],
   },
 
@@ -159,7 +168,7 @@ async function seedAdminPermissions(prisma: PrismaClient): Promise<void> {
     return;
   }
 
-  await createFeaturesAndActions(prisma, ADMIN_PERMISSIONS);
+  // await createFeaturesAndActions(prisma, ADMIN_PERMISSIONS);
   await linkAdminToPermissions(prisma, adminLevel.id);
 }
 

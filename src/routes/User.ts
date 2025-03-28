@@ -8,6 +8,7 @@ const UserRoutes = new Hono();
 UserRoutes.get(
   "/",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("USER_MANAGEMENT", "read"),
   // authMiddleware.checkRole(["ADMIN"]),
   UserController.getAll
 );
@@ -15,6 +16,7 @@ UserRoutes.get(
 UserRoutes.get(
   "/:id",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("USER_MANAGEMENT", "read"),
   // authMiddleware.checkRole(["ADMIN"]),
   UserController.getById
 );
@@ -23,6 +25,8 @@ UserRoutes.post(
   "/",
   UserValidation.validateUserRegisterDTO,
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("USER_MANAGEMENT", "create"),
+
   // authMiddleware.checkRole(["ADMIN"]),
   UserController.create
 );
@@ -30,14 +34,16 @@ UserRoutes.post(
 UserRoutes.put(
   "/:id",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("USER_MANAGEMENT", "update"),
   // authMiddleware.checkRole(["ADMIN"]),
   UserController.update
 );
 
 UserRoutes.delete(
   "/",
-  UserValidation.validationDeletedUsers,
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("USER_MANAGEMENT", "update"),
+  UserValidation.validationDeletedUsers,
   // authMiddleware.checkRole(["ADMIN"]),
   UserController.deleteByIds
 );

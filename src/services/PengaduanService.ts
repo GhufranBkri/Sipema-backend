@@ -73,6 +73,13 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
+    usedFilters.where = {
+      AND: [
+        {
+          tipePengaduan: TypePengaduan.USER,
+        },
+      ],
+    };
     // petugas universitas
     usedFilters.include = {
       pelapor: true,
@@ -101,27 +108,20 @@ export async function getAll(
       });
 
       usedFilters.include = {
-        unit: false,
+        unit: {
+          select: {
+            id: true,
+            nama_unit: true,
+          },
+        },
         kategori: true,
       };
     }
 
-    if (userLevel.name === "KEPALA_PETUGAS_UNIT") {
-      const unit = await prisma.unit.findFirst({
-        where: {
-          kepalaUnitId: user.no_identitas,
-        },
-      });
-
-      if (!unit) {
-        return BadRequestWithMessage("You are not assigned to any unit");
-      }
-
-      usedFilters.where.AND.push({
-        nameUnit: unit.nama_unit,
-      });
-    }
-    if (userLevel.name === "PETUGAS") {
+    if (
+      userLevel.name === "PETUGAS" ||
+      userLevel.name === "KEPALA_PETUGAS_UNIT"
+    ) {
       const officerUnit = await prisma.unit.findFirst({
         where: {
           petugas: {
@@ -135,7 +135,7 @@ export async function getAll(
       }
 
       usedFilters.where.AND.push({
-        nameUnit: officerUnit.nama_unit,
+        unitId: officerUnit.id, // Menggunakan nameUnit bukan unit
       });
     }
 

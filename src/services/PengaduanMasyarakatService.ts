@@ -88,7 +88,7 @@ export async function getAll(
       }
 
       usedFilters.where.AND.push({
-        nameUnit: officerUnit.nama_unit, // Menggunakan nameUnit bukan unit
+        unitId: officerUnit.id, // Menggunakan nameUnit bukan unit
       });
     }
 

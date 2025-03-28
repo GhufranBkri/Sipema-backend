@@ -8,20 +8,24 @@ const AclRoutes = new Hono();
 AclRoutes.get(
   "/features",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("ACL", "read"),
   AclController.getAllFeatures
 );
 
 AclRoutes.get(
   "/:userLevelId",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("ACL", "read"),
   AclController.getByUserLevelId
 );
 
-AclRoutes.get("/", AuthMiddleware.checkJwt, AclController.getAll);
+AuthMiddleware.checkAccess("ACL", "read"),
+  AclRoutes.get("/", AuthMiddleware.checkJwt, AclController.getAll);
 
 AclRoutes.post(
   "/",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("ACL", "create"),
   AclValidation.validateAclCreate,
   AclController.create
 );
