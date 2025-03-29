@@ -199,6 +199,15 @@ export async function getById(
       where: {
         id,
       },
+      include: {
+        unit: {
+          select: {
+            id: true,
+            nama_unit: true,
+          },
+        },
+        kategori: true,
+      },
     });
 
     if (!Pengaduan) return INVALID_ID_SERVICE_RESPONSE;
