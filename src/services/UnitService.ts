@@ -8,7 +8,7 @@ import {
 } from "$entities/Service";
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
-import { Unit } from "@prisma/client";
+import { Unit, User } from "@prisma/client";
 import {
   UnitCreateDTO,
   UnitUpdateDTO,
@@ -79,58 +79,33 @@ export async function addPetugas(
   user: UserJWTDAO
 ): Promise<ServiceResponse<AddPetugasResponse>> {
   try {
-    // Validate input
-    let NameUnit = await prisma.unit.findUnique({
-      where: { id: user.unitId },
-    });
-    if (!Array.isArray(data.petugasIds) || data.petugasIds.length === 0) {
-      return BadRequestWithMessage("Invalid input data");
-    }
-
-    // Check if all petugasIds exist before updating
-    const existingPetugas = await prisma.user.findMany({
-      where: {
-        no_identitas: {
-          in: data.petugasIds,
-        },
-      },
-    });
-
-    if (existingPetugas.length !== data.petugasIds.length) {
-      return BadRequestWithMessage("One or more petugas IDs do not exist");
-    }
-
-    // Use transaction to ensure data consistency
-    const updatedUnit = await prisma.$transaction(async (tx) => {
-      const unit = await tx.unit.findUnique({
-        where: { nama_unit: NameUnit?.nama_unit },
-      });
-
-      if (!unit) {
-        throw new Error("INVALID_ID");
-      }
-
-      return tx.unit.update({
-        where: { nama_unit: NameUnit?.nama_unit },
-        data: {
-          petugas: {
-            connect: data.petugasIds.map((id) => ({ no_identitas: id })),
+    // Update unitId for all specified users
+    const updateResults = await Promise.all(
+      data.petugasIds.map(async (id) => {
+        return prisma.user.update({
+          where: { no_identitas: id },
+          data: {
+            unitId: user.unitId,
           },
-        },
-        include: {
-          petugas: {
-            select: {
-              no_identitas: true,
-              name: true,
+          select: {
+            no_identitas: true,
+            name: true,
+            email: true,
+            program_studi: true,
+            unit_petugas: {
+              select: {
+                id: true,
+                nama_unit: true,
+              },
             },
           },
-        },
-      });
-    });
+        });
+      })
+    );
 
     return {
       status: true,
-      data: updatedUnit,
+      data: updateResults,
     };
   } catch (err) {
     Logger.error(`unitService.addPetugas : ${err}`);
@@ -139,37 +114,116 @@ export async function addPetugas(
 }
 
 export async function deletePetugasByIds(
-  nama_unit: string,
-  petugasIds: string | string[]
+  petugasIds: string,
+  user: UserJWTDAO
 ): Promise<ServiceResponse<{}>> {
   try {
-    const idArray: string[] = Array.isArray(petugasIds)
-      ? petugasIds
-      : JSON.parse(petugasIds);
+    const idArray: string[] = JSON.parse(petugasIds);
+    const unitId = user.unitId;
 
-    const unit = await prisma.unit.findUnique({
-      where: { nama_unit },
-    });
-
-    if (!unit) {
-      return INVALID_ID_SERVICE_RESPONSE;
-    }
-
-    const updatedUnit = await prisma.unit.update({
-      where: { nama_unit },
-      data: {
-        petugas: {
-          disconnect: idArray.map((id) => ({ no_identitas: id })),
+    // Get valid user IDs - we can skip validation as it's done in middleware
+    const existingUsers = await prisma.user.findMany({
+      where: {
+        no_identitas: { in: idArray },
+        unitId: unitId,
+        userLevel: {
+          name: "PETUGAS",
         },
       },
     });
 
+    const validUserIds = existingUsers.map((user) => user.no_identitas);
+
+    // Use transaction to ensure atomicity
+    const result = await prisma.$transaction(async (tx) => {
+      // Disconnect users from unit relation
+      await tx.unit.update({
+        where: { id: unitId },
+        data: {
+          petugas: {
+            disconnect: validUserIds.map((id) => ({ no_identitas: id })),
+          },
+        },
+      });
+
+      // Update unitId to null
+      const updateResults = await tx.user.updateMany({
+        where: {
+          no_identitas: { in: validUserIds },
+          unitId: unitId,
+        },
+        data: {
+          unitId: null,
+        },
+      });
+
+      return {
+        disconnectCount: validUserIds.length,
+        updateCount: updateResults.count,
+      };
+    });
+
     return {
       status: true,
-      data: updatedUnit,
+      data: {
+        message: `Successfully removed ${result.disconnectCount} petugas from unit`,
+        updatedUsers: validUserIds,
+        unitId: unitId,
+        disconnectedCount: result.disconnectCount,
+        updatedCount: result.updateCount,
+      },
     };
   } catch (err) {
     Logger.error(`unitService.deletePetugasByIds : ${err}`);
+    return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
+  }
+}
+
+export type GetAllPetugasResponse = PagedList<User[]> | {};
+export async function getAllPetugas(
+  filters: FilteringQueryV2,
+  user: UserJWTDAO
+): Promise<ServiceResponse<GetAllResponse>> {
+  try {
+    const usedFilters = buildFilterQueryLimitOffsetV2(filters);
+    usedFilters.include = {
+      unit_petugas: {
+        select: {
+          id: true,
+          nama_unit: true,
+        },
+      },
+      userLevel: {
+        select: {
+          name: true,
+        },
+      },
+    };
+    usedFilters.where = {
+      unitId: user.unitId ? user.unitId : undefined,
+    };
+
+    const [users, totalData] = await Promise.all([
+      prisma.user.findMany(usedFilters),
+      prisma.user.count({
+        where: usedFilters.where,
+      }),
+    ]);
+
+    let totalPage = 1;
+    if (totalData > usedFilters.take)
+      totalPage = Math.ceil(totalData / usedFilters.take);
+
+    return {
+      status: true,
+      data: {
+        entries: users,
+        totalData,
+        totalPage,
+      },
+    };
+  } catch (err) {
+    Logger.error(`UserService.getAll : ${err} `);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }

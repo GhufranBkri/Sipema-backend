@@ -37,6 +37,10 @@ export interface UnitDTO {
   };
 }
 
+export interface RemovePetugasDTO {
+  petugasIds: string[];
+}
+
 // DTO for adding petugas to unit
 export interface AddPetugasDTO {
   // nama_unit: string;

@@ -86,6 +86,7 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     permissions: [
       { subject: "PENGADUAN", action: ["read", "update", "delete"] },
       // { subject: "USER_MANAGEMENT", action: ["read"] },
+      { subject: "UM_UNIT", action: ["read", "create", "update", "delete"] },
     ],
   },
 };

@@ -108,21 +108,10 @@ export async function validateUnitUpdateDTO(c: Context, next: Next) {
 
 export async function validateAddPetugasDTO(c: Context, next: Next) {
   const data: AddPetugasDTO = await c.req.json();
-  const invalidFields: ErrorStructure[] = [];
   const user: UserJWTDAO = c.get("jwtPayload");
+  const invalidFields: ErrorStructure[] = [];
 
   // Basic validations
-  const unit = await prisma.unit.findUnique({
-    where: { id: user.unitId },
-  });
-  if (!unit?.id) {
-    invalidFields.push(generateErrorStructure("unit", "notfound"));
-  }
-
-  if (!unit?.nama_unit) {
-    invalidFields.push(generateErrorStructure("nama_unit", "cannot be empty"));
-  }
-
   if (
     !data.petugasIds ||
     !Array.isArray(data.petugasIds) ||
@@ -131,75 +120,73 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
     invalidFields.push(
       generateErrorStructure("petugasIds", "must be a non-empty array")
     );
+    return response_bad_request(c, "Validation Error", invalidFields);
+  }
+
+  // Verify the unit exists
+  const unit = await prisma.unit.findUnique({
+    where: { id: user.unitId },
+    include: { petugas: true },
+  });
+
+  if (!unit) {
+    invalidFields.push(generateErrorStructure("unit", "not found"));
+    return response_bad_request(c, "Validation Error", invalidFields);
   }
 
   // Check if all petugasIds exist and are PETUGAS
-  if (data.petugasIds && Array.isArray(data.petugasIds)) {
-    const existingPetugas = await prisma.user.findMany({
-      where: {
-        no_identitas: {
-          in: data.petugasIds,
-        },
+  const existingPetugas = await prisma.user.findMany({
+    where: {
+      no_identitas: { in: data.petugasIds },
+      userLevel: {
+        name: "PETUGAS",
       },
-    });
+    },
+  });
 
-    if (existingPetugas.length !== data.petugasIds.length) {
-      invalidFields.push(
-        generateErrorStructure("petugasIds", "petugas IDs do not exist")
-      );
-    } else {
-      // Check if all users have PETUGAS role
-      const finduserLevel = await prisma.userLevels.findUnique({
-        where: { name: "KEPALA_PETUGAS_UNIT" },
-      });
-
-      const nonPetugasUsers = existingPetugas.filter(
-        (user) => user.userLevelId !== finduserLevel?.id
-      );
-      if (nonPetugasUsers.length > 0) {
-        invalidFields.push(
-          generateErrorStructure("petugasIds", "users do not have PETUGAS role")
-        );
-      }
-
-      // Check if any petugas is already in this unit
-
-      // Check if petugas is in another unit
-      const petugasInOtherUnit = await prisma.unit.findFirst({
-        where: {
-          nama_unit: { not: unit?.nama_unit },
-          petugas: { some: { no_identitas: { in: data.petugasIds } } },
-        },
-      });
-
-      if (petugasInOtherUnit) {
-        invalidFields.push(
-          generateErrorStructure(
-            "petugasIds",
-            "petugas already in another unit"
-          )
-        );
-      }
-    }
+  if (existingPetugas.length === 0) {
+    invalidFields.push(
+      generateErrorStructure("petugasIds", "no valid petugas found")
+    );
+  } else if (existingPetugas.length !== data.petugasIds.length) {
+    invalidFields.push(
+      generateErrorStructure(
+        "petugasIds",
+        "one or more petugas IDs are invalid"
+      )
+    );
   }
-  // Return validation errors if any
+
+  // Check if any petugas is already assigned to another unit
+  const alreadyAssignedPetugas = await prisma.user.findMany({
+    where: {
+      no_identitas: { in: data.petugasIds },
+      unitId: { not: null },
+    },
+  });
+
+  if (alreadyAssignedPetugas.length > 0) {
+    invalidFields.push(
+      generateErrorStructure(
+        "petugasIds",
+        "one or more petugas are already assigned to a unit"
+      )
+    );
+  }
+
   if (invalidFields.length > 0) {
     return response_bad_request(c, "Validation Error", invalidFields);
   }
+
   await next();
 }
 
 export async function validateRemovePetugasDTO(c: Context, next: Next) {
   const data: AddPetugasDTO = await c.req.json();
+  const user: UserJWTDAO = c.get("jwtPayload");
   const invalidFields: ErrorStructure[] = [];
 
-  const nama_unit = c.req.param("nama_unit");
-
-  // Basic validations
-  if (!nama_unit) {
-    invalidFields.push(generateErrorStructure("nama_unit", "cannot be empty"));
-  }
-
+  // Basic validation for petugasIds
   if (
     !data.petugasIds ||
     !Array.isArray(data.petugasIds) ||
@@ -208,19 +195,44 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
     invalidFields.push(
       generateErrorStructure("petugasIds", "must be a non-empty array")
     );
+    return response_bad_request(c, "Validation Error", invalidFields);
   }
-  // Check if petugas exists in the specified unit
-  const existingPetugas = await prisma.user.findMany({
+
+  // Verify the unit exists
+  const unit = await prisma.unit.findUnique({
+    where: { id: user.unitId },
+    include: { petugas: true },
+  });
+
+  if (!unit) {
+    invalidFields.push(generateErrorStructure("unit", "not found"));
+    return response_bad_request(c, "Validation Error", invalidFields);
+  }
+
+  // Verify users exist and belong to the specified unit
+  const existingUsers = await prisma.user.findMany({
     where: {
-      no_identitas: {
-        in: data.petugasIds,
+      no_identitas: { in: data.petugasIds },
+      unitId: user.unitId,
+      userLevel: {
+        name: "PETUGAS",
       },
     },
   });
 
-  if (existingPetugas.length !== data.petugasIds.length) {
+  if (existingUsers.length === 0) {
     invalidFields.push(
-      generateErrorStructure("petugasIds", "petugas IDs do not exist")
+      generateErrorStructure(
+        "petugasIds",
+        "no valid petugas found in the specified unit"
+      )
+    );
+  } else if (existingUsers.length !== data.petugasIds.length) {
+    invalidFields.push(
+      generateErrorStructure(
+        "petugasIds",
+        "one or more petugas IDs are invalid or not in this unit"
+      )
     );
   }
 
@@ -228,7 +240,7 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
     return response_bad_request(c, "Validation Error", invalidFields);
   }
 
-  await next(); // Add this line to continue the middleware chain
+  await next();
 }
 
 export async function validationDeletedUnit(c: Context, next: Next) {

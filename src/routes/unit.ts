@@ -6,8 +6,14 @@ import * as unitValidation from "$validations/UnitValidation";
 const unitRoutes = new Hono();
 
 unitRoutes.get("/", AuthMiddleware.decodeJwt, unitController.getAll);
-
 unitRoutes.get("/:id", unitController.getById);
+
+unitRoutes.get(
+  "/petugas/unit",
+  AuthMiddleware.checkJwt,
+  // AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),
+  unitController.getAllPetugas
+);
 
 unitRoutes.post(
   "/",
@@ -17,6 +23,7 @@ unitRoutes.post(
   unitValidation.validateUnitCreateDTO,
   unitController.create
 );
+
 unitRoutes.post(
   "/petugas",
   AuthMiddleware.checkJwt,
@@ -25,8 +32,8 @@ unitRoutes.post(
   unitController.addPetugas
 );
 
-unitRoutes.delete(
-  "/:nama_unit/petugas",
+unitRoutes.put(
+  "/petugas",
   AuthMiddleware.checkJwt,
   // AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),
 

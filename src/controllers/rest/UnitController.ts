@@ -5,7 +5,12 @@ import {
   response_created,
   response_success,
 } from "$utils/response.utils";
-import { UnitDTO, UnitCreateDTO, AddPetugasDTO } from "$entities/Unit";
+import {
+  UnitDTO,
+  UnitCreateDTO,
+  AddPetugasDTO,
+  RemovePetugasDTO,
+} from "$entities/Unit";
 import { FilteringQueryV2 } from "$entities/Query";
 import { UserJWTDAO } from "$entities/User";
 import { checkFilteringQueryV2 } from "$controllers/helpers/CheckFilteringQuery";
@@ -44,17 +49,39 @@ export async function addPetugas(c: Context): Promise<TypedResponse> {
 }
 
 export async function removePetugas(c: Context): Promise<TypedResponse> {
-  const data = await c.req.json();
-  const nama_unit = c.req.param("nama_unit");
+  const { petugasIds }: RemovePetugasDTO = await c.req.json();
+  const user: UserJWTDAO = c.get("jwtPayload");
 
   const serviceResponse = await unitService.deletePetugasByIds(
-    nama_unit,
-    data.petugasIds
+    JSON.stringify(petugasIds),
+    user
   );
+
+  if (!serviceResponse.status) {
+    return handleServiceErrorWithResponse(c, serviceResponse);
+  }
+
   return response_success(
     c,
     serviceResponse.data,
     "Successfully deleted petugas from unit!"
+  );
+}
+
+export async function getAllPetugas(c: Context): Promise<TypedResponse> {
+  const filters: FilteringQueryV2 = checkFilteringQueryV2(c);
+  const user: UserJWTDAO = c.get("jwtPayload");
+
+  const serviceResponse = await unitService.getAllPetugas(filters, user);
+
+  if (!serviceResponse.status) {
+    return handleServiceErrorWithResponse(c, serviceResponse);
+  }
+
+  return response_success(
+    c,
+    serviceResponse.data,
+    "Successfully fetched all unit!"
   );
 }
 
