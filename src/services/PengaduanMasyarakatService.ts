@@ -61,6 +61,10 @@ export async function getAll(
       kategori: true,
     };
 
+    usedFilters.where = {
+      tipePengaduan: TypePengaduan.MASYARAKAT,
+    };
+
     const userLevel = await prisma.userLevels.findUnique({
       where: {
         id: user.userLevelId,
