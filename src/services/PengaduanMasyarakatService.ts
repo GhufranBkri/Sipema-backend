@@ -52,6 +52,14 @@ export async function getAll(
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
     // petugas universiatas can only see pengaduan masyarakat
+
+    usedFilters.where = {
+      AND: [
+        {
+          tipePengaduan: TypePengaduan.MASYARAKAT,
+        },
+      ],
+    };
     usedFilters.include = {
       unit: {
         include: {
@@ -59,11 +67,6 @@ export async function getAll(
         },
       },
       kategori: true,
-    };
-
-    usedFilters.where = {
-      tipePengaduan: TypePengaduan.MASYARAKAT,
-      AND: [],
     };
 
     const userLevel = await prisma.userLevels.findUnique({
