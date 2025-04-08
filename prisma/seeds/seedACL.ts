@@ -77,6 +77,7 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     permissions: [
       { subject: "PENGADUAN_WBS", action: ["read", "update", "delete"] },
       { subject: "USER_MANAGEMENT", action: ["read"] },
+      { subject: "PENGADUAN_MASYARAKAT", action: ["read", "update", "delete"] },
     ],
   },
   PETUGAS: {
@@ -85,6 +86,7 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
   KEPALA_PETUGAS_UNIT: {
     permissions: [
       { subject: "PENGADUAN", action: ["read", "update", "delete"] },
+      { subject: "PENGADUAN_MASYARAKAT", action: ["read", "update", "delete"] },
       // { subject: "USER_MANAGEMENT", action: ["read"] },
       { subject: "UM_UNIT", action: ["read", "create", "update", "delete"] },
     ],

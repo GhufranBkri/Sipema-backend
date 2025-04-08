@@ -17,31 +17,38 @@ class WaService {
 
   constructor() {
     this.apiUrl = "https://graph.facebook.com/v21.0/498746269997375/messages";
-    this.token = process.env.WHATSAPP_TOKEN || "";
+    this.token =
+      "EAAWlvp2y10kBO2qhbRjNAXfBKlA5MlWZBgQjZCPSbVBNpTi1vFpGujtBoGaNaNxGOXtPGilRsXZBNCwMtFGqpZBitps1GRrCRo6tflkk1Pv7zkrpoDNujCZAS8JXVr7gace0ZAAxKBb0EOkQT4XHY2iyadZCma1coZA2fJUXvcpeuNDcSu43NYDnPrwIqrN2OYQ4zwRvQEEIeQ4r7GiZCZCgyQeT3due59Kl2nZATgZD";
   }
 
   public async sendMessage(
     to: string,
     templateData: PengaduanDTO
   ): Promise<ServiceResponse<SendMessageResponse>> {
+    const cleanNumber = to.replace(/\D/g, "");
+    const formattedNumber = cleanNumber.startsWith("62")
+      ? cleanNumber
+      : `62${cleanNumber.substring(1)}`;
+
     const data = {
       messaging_product: "whatsapp",
       recipient_type: "individual",
-      to,
+      to: formattedNumber,
       type: "template",
       template: {
         name: "create_pelporan",
         language: {
           code: "id",
         },
+        namespace: process.env.WHATSAPP_TEMPLATE_NAMESPACE, // Add this
         components: [
           {
             type: "body",
             parameters: [
-              { type: "text", text: templateData.nama },
-              { type: "text", text: templateData.id },
-              { type: "text", text: templateData.judul },
-              { type: "text", text: templateData.deskripsi },
+              { type: "text", text: String(templateData.nama || "-") },
+              { type: "text", text: String(templateData.id || "-") },
+              { type: "text", text: String(templateData.judul || "-") },
+              { type: "text", text: String(templateData.deskripsi || "-") },
               {
                 type: "text",
                 text: new Date().toLocaleDateString("id-ID", {
@@ -63,20 +70,19 @@ class WaService {
           "Content-Type": "application/json",
         },
       });
+
       Logger.info("Message sent successfully:", response.data);
       return {
         status: true,
         data: { success: true },
       };
     } catch (error: any) {
-      console.error("WhatsApp API Error:", {
+      Logger.error("WhatsApp API Error:", {
         message: error.message,
         status: error.response?.status,
-        statusText: error.response?.statusText,
         responseData: error.response?.data,
-        requestData: data,
+        requestData: JSON.stringify(data, null, 2),
       });
-
       return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
     }
   }
