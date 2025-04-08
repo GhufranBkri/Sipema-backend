@@ -39,7 +39,6 @@ PengaduanMasyarakatRoutes.patch(
   "/:id",
   AuthMiddleware.checkJwt,
   AuthMiddleware.checkAccess("PENGADUAN_MASYARAKAT", "update"),
-  // AuthMiddleware.checkRole(["PETUGAS_SUPER", "KEPALA_PETUGAS_UNIT", "PETUGAS"]),
   PengaduanMasyarakatController.update
 );
 

@@ -104,6 +104,12 @@ export async function validateUpdatePengaduanDTO(c: Context, next: Next) {
     },
   });
 
+  if (pengaduan?.status === "COMPLETED") {
+    invalidFields.push(
+      generateErrorStructure("status", "cannot update COMPLATED complaint")
+    );
+  }
+
   if (userLevel?.name === "DOSEN" || userLevel?.name === "MAHASISWA") {
     if (data.status) {
       invalidFields.push(

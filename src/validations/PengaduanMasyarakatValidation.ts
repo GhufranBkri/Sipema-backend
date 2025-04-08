@@ -71,3 +71,31 @@ export async function validatePengaduanMasyarakatDTO(c: Context, next: Next) {
 
   await next();
 }
+
+export async function validationPelaporanMasyarakatUpdate(
+  c: Context,
+  next: Next
+) {
+  const invalidFields: ErrorStructure[] = [];
+  const id = c.req.param("id");
+
+  const findPengaduan = await prisma.pengaduan.findUnique({
+    where: { id },
+  });
+
+  if (!findPengaduan) {
+    invalidFields.push(generateErrorStructure("id", "Pengaduan not found"));
+  }
+
+  if (findPengaduan?.status === "COMPLETED") {
+    invalidFields.push(
+      generateErrorStructure("status", "cannot update COMPLATED complaint")
+    );
+  }
+
+  if (invalidFields.length > 0) {
+    return response_bad_request(c, "Invalid Fields", invalidFields);
+  }
+
+  await next();
+}

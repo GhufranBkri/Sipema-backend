@@ -115,6 +115,17 @@ export async function validatePelaporanWBSUpdateDTO(c: Context, next: Next) {
 
   const id = c.req.param("id");
 
+  const findStatus = await prisma.pengaduanWBS.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+
+  if (findStatus?.status === "COMPLETED") {
+    invalidFields.push(
+      generateErrorStructure("status", "cannot update COMPLATED complaint")
+    );
+  }
+
   const pelaporan = await prisma.pengaduanWBS.findUnique({
     where: { id },
     include: { pelapor: true },
