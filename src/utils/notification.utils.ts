@@ -4,6 +4,7 @@ import { NotificationDTO } from "$entities/Notification";
 import * as NotificationService from "$services/NotificationService";
 import { prisma } from "./prisma.utils";
 import { PengaduanDTO } from "$entities/Pengaduan";
+import Logger from "$pkg/logger";
 
 /**
  * Utility functions for sending notifications
@@ -40,6 +41,7 @@ export const NotificationUtils = {
       };
 
       // Send the notification
+      Logger.info("Message sent successfully: to", staffId);
       return await NotificationService.create(notification);
     } catch (error) {
       console.error("Failed to send new complaint notification:", error);
@@ -64,8 +66,9 @@ export const NotificationUtils = {
         ...template,
         id: randomUUID(),
         userId: staffId,
-        pelaporanWBSId: pengaduanId,
+        pengaduanWBSId: pengaduanId,
       };
+      Logger.info("Message sent successfully: to", staffId);
 
       // Send the notification
       return await NotificationService.create(notification);
@@ -143,7 +146,7 @@ export const NotificationUtils = {
         isRead: false,
         userId: userId,
         type: "REPORT_UPDATED",
-        pelaporanWBSId: pengaduanId,
+        pengaduanWBSId: pengaduanId,
       };
 
       // Send the notification for user

@@ -31,32 +31,34 @@ export async function create(
       },
     });
 
-    // Send WhatsApp notification
+    // Get staff members
+    const unit = await prisma.unit.findUnique({
+      where: { nama_unit: data.unitId },
+    });
 
-    // // Get staff members
-    // const unit = await prisma.unit.findUnique({
-    //   where: { nama_unit: data.unitId },
-    // });
+    const staff = await prisma.user.findMany({
+      where: {
+        unitId: unit?.id,
+        userLevel: {
+          name: {
+            in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"],
+          },
+        },
+      },
+    });
 
-    // const finduserLevel = await prisma.userLevels.findUnique({
-    //   where: { id: user.userLevelId },
-    // });
-
-    // const staff = await prisma.user.findMany({
-    //   where: {
-    //     unitId: unit?.id,
-    //     userLevelId: { in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"] },
-    //   },
-    // });
-
-    // // Send notifications to all staff members
-    // for (const staffMember of staff) {
-    //   await NotificationUtils.sendNewComplaintNotification(
-    //     data,
-    //     staffMember.no_identitas,
-    //     pengaduan.id
-    //   );
-    // }
+    Logger.info(
+      "staff id:",
+      staff.map((s) => s.no_identitas)
+    );
+    // Send notifications to all staff members
+    for (const staffMember of staff) {
+      await NotificationUtils.sendNewComplaintNotification(
+        data,
+        staffMember.no_identitas,
+        pengaduan.id
+      );
+    }
 
     return { status: true, data: pengaduan };
   } catch (error) {

@@ -9,5 +9,5 @@ export interface NotificationDTO {
   type: NotificationType;
   pengaduanId?: string;
   pengaduanMasyarakatId?: string;
-  pelaporanWBSId?: string;
+  pengaduanWBSId?: string;
 }
