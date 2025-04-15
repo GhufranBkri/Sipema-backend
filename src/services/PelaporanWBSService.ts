@@ -82,7 +82,11 @@ export async function getAll(
     }
 
     // dosen or pelapor
-    if (userLevel.name === "DOSEN") {
+    if (
+      userLevel.name === "DOSEN" ||
+      userLevel.name === "TENAGA_KEPENDIDIKAN" ||
+      userLevel.name === "MAHASISWA"
+    ) {
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
       });
