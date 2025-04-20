@@ -13,12 +13,11 @@ export type SendMessageResponse = { success: boolean } | {};
 
 class WaService {
   private apiUrl: string;
-  private token: string;
+  private token?: string;
 
   constructor() {
     this.apiUrl = "https://graph.facebook.com/v21.0/498746269997375/messages";
-    this.token =
-      "EAAWlvp2y10kBO2qhbRjNAXfBKlA5MlWZBgQjZCPSbVBNpTi1vFpGujtBoGaNaNxGOXtPGilRsXZBNCwMtFGqpZBitps1GRrCRo6tflkk1Pv7zkrpoDNujCZAS8JXVr7gace0ZAAxKBb0EOkQT4XHY2iyadZCma1coZA2fJUXvcpeuNDcSu43NYDnPrwIqrN2OYQ4zwRvQEEIeQ4r7GiZCZCgyQeT3due59Kl2nZATgZD";
+    this.token = process.env.WHATSAPP_TOKEN;
   }
 
   public async sendMessage(
@@ -40,7 +39,7 @@ class WaService {
         language: {
           code: "id",
         },
-        namespace: process.env.WHATSAPP_TEMPLATE_NAMESPACE, // Add this
+        namespace: process.env.WHATSAPP_TEMPLATE_NAMESPACE,
         components: [
           {
             type: "body",

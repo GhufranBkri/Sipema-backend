@@ -7,22 +7,10 @@ const NotificationRoutes = new Hono();
 NotificationRoutes.get(
   "/",
   authMiddleware.checkJwt,
-  // authMiddleware.checkRole([
-  //   "DOSEN",
-  //   "KEPALA_PETUGAS_UNIT",
-  //   "KEPALA_WBS",
-  //   "MAHASISWA",
-  //   "PETUGAS",
-  //   "PETUGAS_SUPER",
-  //   "PETUGAS_WBS",
-  //   "TENAGA_KEPENDIDIKAN",
-  // ]),
   NotificationController.getAll
 );
 
 NotificationRoutes.get("/:id", NotificationController.getById);
-
-// NotificationRoutes.post("/", NotificationController.create);
 
 NotificationRoutes.put("/:id", NotificationController.update);
 
