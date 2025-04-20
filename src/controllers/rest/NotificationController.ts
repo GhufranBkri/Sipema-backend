@@ -2,10 +2,14 @@ import { Context, TypedResponse } from "hono";
 import * as NotificationService from "$services/NotificationService";
 import {
   handleServiceErrorWithResponse,
+  response_created,
   //   response_created,
   response_success,
 } from "$utils/response.utils";
-import { NotificationDTO } from "$entities/Notification";
+import {
+  NotificationDTO,
+  NotificationOfficerAllert,
+} from "$entities/Notification";
 import { FilteringQueryV2 } from "$entities/Query";
 import { checkFilteringQueryV2 } from "$controllers/helpers/CheckFilteringQuery";
 import { UserJWTDAO } from "$entities/User";
@@ -25,6 +29,24 @@ import { UserJWTDAO } from "$entities/User";
 //     "Successfully created new Notification!"
 //   );
 // }
+
+export async function notifyOfficerAlert(c: Context): Promise<TypedResponse> {
+  const data: NotificationOfficerAllert = await c.req.json();
+
+  const serviceResponse = await NotificationService.sendAllertToOfficerAllert(
+    data
+  );
+
+  if (!serviceResponse.status) {
+    return handleServiceErrorWithResponse(c, serviceResponse);
+  }
+
+  return response_created(
+    c,
+    serviceResponse.data,
+    "Successfully created new Notification!"
+  );
+}
 
 export async function getAll(c: Context): Promise<TypedResponse> {
   const filters: FilteringQueryV2 = checkFilteringQueryV2(c);

@@ -49,6 +49,37 @@ export const NotificationUtils = {
     }
   },
 
+  sendNewNotifyOfficerAlert: async (
+    judul: string,
+    staffId: string,
+    pengaduanId: string
+  ) => {
+    try {
+      // Get notification template
+      const template = PengaduanNotifications.newAllertToOfficer(
+        pengaduanId,
+        judul
+      );
+
+      // Build complete notification object
+      const notification: NotificationDTO = {
+        ...template,
+        id: randomUUID(),
+        userId: staffId,
+        pengaduanId: pengaduanId,
+        isRead: false,
+      };
+
+      Logger.info("Reminder notification sent to:", staffId);
+
+      // Send the notification
+      return await NotificationService.create(notification);
+    } catch (error) {
+      console.error("Failed to send reminder notification:", error);
+      throw error;
+    }
+  },
+
   /**
    * Send notification to staff WBS about a new complaint
    */

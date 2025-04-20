@@ -39,6 +39,7 @@ enum NotificationType {
   NEW_REPORT
   REPORT_UPDATED
   REPORT_IN_PROCESS
+  REMINDER
 }
 
 model Notification {

@@ -17,6 +17,15 @@ export const PengaduanNotifications = {
     type: "NEW_REPORT",
   }),
 
+  newAllertToOfficer: (reportId: string, judul: string): NotificationDTO => ({
+    id: "",
+    title: `⚠️ Peringatan: Laporan Tertunda`,
+    message: `Laporan dengan ID ${reportId} dan judul "${judul}" belum diproses selama 3 hari. Mohon segera ditindaklanjuti.`,
+    isRead: false,
+    userId: "",
+    type: "REMINDER",
+  }),
+
   /**
    * Notification for new WBS complaint reports to all WBS officers
    */

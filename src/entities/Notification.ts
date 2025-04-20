@@ -11,3 +11,7 @@ export interface NotificationDTO {
   pengaduanMasyarakatId?: string;
   pengaduanWBSId?: string;
 }
+
+export interface NotificationOfficerAllert {
+  pengaduanId: string;
+}

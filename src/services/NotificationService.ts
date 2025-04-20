@@ -7,9 +7,13 @@ import {
 import Logger from "$pkg/logger";
 import { prisma } from "$utils/prisma.utils";
 import { Notification } from "@prisma/client";
-import { NotificationDTO } from "$entities/Notification";
+import {
+  NotificationDTO,
+  NotificationOfficerAllert,
+} from "$entities/Notification";
 import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
+import { NotificationUtils } from "$utils/notification.utils";
 
 export type CreateResponse = Notification | {};
 export async function create(
@@ -26,6 +30,62 @@ export async function create(
     };
   } catch (err) {
     Logger.error(`NotificationService.create : ${err}`);
+    return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
+  }
+}
+
+export type sendAllertToOfficer = Notification | {};
+export async function sendAllertToOfficerAllert(
+  data: NotificationOfficerAllert
+): Promise<ServiceResponse<sendAllertToOfficer>> {
+  try {
+    const pengaduan = await prisma.pengaduan.findUnique({
+      where: {
+        id: data.pengaduanId,
+      },
+    });
+
+    if (!pengaduan) {
+      Logger.error(`Pengaduan with ID ${data.pengaduanId} not found`);
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    const staff = await prisma.user.findMany({
+      where: {
+        unitId: pengaduan.unitId,
+        userLevel: {
+          name: {
+            in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"],
+          },
+        },
+      },
+    });
+
+    Logger.info(
+      `Found ${staff.length} staff members for unit ${pengaduan.unitId}`
+    );
+
+    // Track notifications sent
+    let notificationsSent = 0;
+
+    for (const staffMember of staff) {
+      await NotificationUtils.sendNewNotifyOfficerAlert(
+        pengaduan.judul,
+        staffMember.no_identitas,
+        pengaduan.id
+      );
+      notificationsSent++;
+    }
+
+    return {
+      status: true,
+      data: {
+        successCount: notificationsSent,
+        message: `Successfully sent ${notificationsSent} notifications`,
+      },
+    };
+  } catch (err) {
+    Logger.error(`NotificationService.sendAllertToOfficerAllert : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
