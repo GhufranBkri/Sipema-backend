@@ -104,7 +104,14 @@ export async function getAll(
       return INVALID_ID_SERVICE_RESPONSE;
     }
 
-    if (userLevel.name === "DOSEN" || userLevel.name === "MAHASISWA") {
+    if (
+      userLevel.name !== "PETUGAS" ||
+      userLevel.name !== "KEPALA_PETUGAS_UNIT" ||
+      userLevel.name !== "PETUGAS_SUPER" ||
+      userLevel.name !== "ADMIN" ||
+      userLevel.name !== "KEPALA_WBS" ||
+      userLevel.name !== "PETUGAS_WBS" ||
+    ) {
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
       });
