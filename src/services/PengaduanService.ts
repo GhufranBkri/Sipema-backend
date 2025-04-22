@@ -107,7 +107,7 @@ export async function getAll(
     if (
       userLevel.name === "DOSEN" ||
       userLevel.name === "MAHASISWA" ||
-      userLevel.name === "MAHASISWA"
+      userLevel.name === "TENAGA_KEPENDIDIKAN"
     ) {
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
