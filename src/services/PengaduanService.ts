@@ -104,22 +104,11 @@ export async function getAll(
       return INVALID_ID_SERVICE_RESPONSE;
     }
 
-    const aclRoles = await prisma.acl.findMany({
-      where: {
-        namaFeature: "PENGADUAN", // Changed from subject to namaFeature
-        namaAction: {
-          // Changed from action to namaAction
-          in: ["read", "create", "update", "delete"],
-        },
-      },
-      select: {
-        userLevel: true,
-      },
-    });
-
-    const restrictedRoles = aclRoles.map((acl) => acl.userLevel.name);
-
-    if (!restrictedRoles.includes(userLevel.name)) {
+    if (
+      userLevel.name === "DOSEN" ||
+      userLevel.name === "MAHASISWA" ||
+      userLevel.name === "MAHASISWA"
+    ) {
       usedFilters.where.AND.push({
         pelaporId: user.no_identitas,
       });
