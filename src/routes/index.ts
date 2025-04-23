@@ -31,6 +31,7 @@ router.route("/kategoriWbs", RoutesRegistry.KategoriWBSRoutes);
 router.route("/PelaporanWbs", RoutesRegistry.PelaporanWBSRoutes);
 router.route("/notification", RoutesRegistry.NotificationRoutes);
 router.route("/acl", RoutesRegistry.AclRoutes);
+router.route("/user-level", RoutesRegistry.UserLevelsRoutes);
 
 router.get("/", (c: Context) => {
   return c.json({ message: "What are u doin nigga?" });

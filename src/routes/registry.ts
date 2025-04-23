@@ -8,6 +8,7 @@ import KategoriWBSRoutes from "./KategoriWBS";
 import PelaporanWBSRoutes from "./PelaporanWBS";
 
 import NotificationRoutes from "./Notification";
+import UserLevelsRoutes from "./UserLevels";
 import AclRoutes from "./Acl";
 
 const RoutesRegistry = {
@@ -21,6 +22,7 @@ const RoutesRegistry = {
   PelaporanWBSRoutes,
   NotificationRoutes,
   AclRoutes,
+  UserLevelsRoutes,
 };
 
 export default RoutesRegistry;
