@@ -16,10 +16,10 @@ class WaService {
   private token?: string;
 
   constructor() {
-    this.apiUrl = "https://graph.facebook.com/v21.0/498746269997375/messages";
-    this.token = process.env.WHATSAPP_TOKEN;
+    this.apiUrl =
+      process.env.API_URL_WA ||
+      "https://app.wanotifier.com/api/v1/notifications/U7atx3kihB?key=pLsUzESipNW7qzpum3u4OjOvH8m7os";
   }
-
   public async sendMessage(
     to: string,
     templateData: PengaduanDTO
@@ -29,43 +29,41 @@ class WaService {
       ? cleanNumber
       : `62${cleanNumber.substring(1)}`;
 
+    // Ensure all values have fallbacks to prevent "missing text value" errors
+    const nama = templateData.nama || "Pelapor";
+    const id = templateData.id || "ID-UNKNOWN";
+    const judul = templateData.judul || "Tidak ada judul";
+    const deskripsi = templateData.deskripsi || "Tidak ada deskripsi";
+    const tanggal = new Date().toLocaleDateString("id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+
     const data = {
-      messaging_product: "whatsapp",
-      recipient_type: "individual",
-      to: formattedNumber,
-      type: "template",
-      template: {
-        name: "create_pelporan",
-        language: {
-          code: "id",
-        },
-        namespace: process.env.WHATSAPP_TEMPLATE_NAMESPACE,
-        components: [
-          {
-            type: "body",
-            parameters: [
-              { type: "text", text: String(templateData.nama || "-") },
-              { type: "text", text: String(templateData.id || "-") },
-              { type: "text", text: String(templateData.judul || "-") },
-              { type: "text", text: String(templateData.deskripsi || "-") },
-              {
-                type: "text",
-                text: new Date().toLocaleDateString("id-ID", {
-                  day: "numeric",
-                  month: "long",
-                  year: "numeric",
-                }),
-              },
-            ],
-          },
-        ],
+      data: {
+        body_variables: [nama, id, judul, deskripsi, tanggal],
       },
+      recipients: [
+        {
+          whatsapp_number: formattedNumber,
+          first_name: nama,
+          last_name: "", // Separate last name to prevent undefined
+          attributes: {
+            pengaduan_id: id,
+            judul: judul,
+            deskripsi: deskripsi,
+          },
+          lists: ["Default"],
+          tags: ["new lead", "notification sent"],
+          replace: false,
+        },
+      ],
     };
 
     try {
       const response = await axios.post(this.apiUrl, data, {
         headers: {
-          Authorization: `Bearer ${this.token}`,
           "Content-Type": "application/json",
         },
       });
