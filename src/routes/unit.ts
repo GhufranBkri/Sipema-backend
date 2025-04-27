@@ -43,10 +43,9 @@ unitRoutes.put(
 
 unitRoutes.put(
   "/:id",
-  unitValidation.validateUnitUpdateDTO,
-
-  AuthMiddleware.checkAccess("UNIT", "update"),
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("UNIT", "update"),
+  unitValidation.validateUnitUpdateDTO,
   unitController.update
 );
 
