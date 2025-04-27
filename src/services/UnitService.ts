@@ -368,32 +368,44 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    await Promise.all(
-      idArray.map(async (id) => {
-        await prisma.pengaduan.deleteMany({
-          where: {
-            unitId: id,
-          },
-        });
-
-        await prisma.pengaduan.deleteMany({
-          where: {
-            unitId: id,
-          },
-        });
-      })
-    );
-    idArray.forEach(async (id) => {
-      await prisma.unit.delete({
+    // Use transaction to ensure all operations complete or none do
+    await prisma.$transaction(async (tx) => {
+      // First update all users to clear unitId for those associated with the units being deleted
+      await tx.user.updateMany({
         where: {
-          id,
+          unitId: {
+            in: idArray,
+          },
+        },
+        data: {
+          unitId: null,
+        },
+      });
+
+      // Delete any pengaduan records associated with the units
+      await tx.pengaduan.deleteMany({
+        where: {
+          unitId: {
+            in: idArray,
+          },
+        },
+      });
+
+      // Delete the units themselves
+      await tx.unit.deleteMany({
+        where: {
+          id: {
+            in: idArray,
+          },
         },
       });
     });
 
     return {
       status: true,
-      data: true,
+      data: {
+        message: `Successfully deleted units and cleared associated user references`,
+      },
     };
   } catch (err) {
     Logger.error(`unitService.deleteByIds : ${err}`);

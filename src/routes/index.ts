@@ -34,7 +34,7 @@ router.route("/acl", RoutesRegistry.AclRoutes);
 router.route("/user-level", RoutesRegistry.UserLevelsRoutes);
 
 router.get("/", (c: Context) => {
-  return c.json({ message: "What are u doin nigga?" });
+  return c.json({ message: "Halo teman teman" });
 });
 
 router.get("/robots.txt", (c: Context) => {

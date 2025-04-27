@@ -206,7 +206,7 @@ export async function seedAdmin(prisma: PrismaClient) {
     }
   }
 
-  // Create Unit first
+  // Find Unit first
   const findUnit = await prisma.unit.findUnique({
     where: {
       nama_unit: "Unit TI",
@@ -219,30 +219,33 @@ export async function seedAdmin(prisma: PrismaClient) {
       },
     });
     if (findPetugas) {
-      const countPetugas = await prisma.user.count({
+      // Check if the specific user with no_identitas "4001" exists
+      const existingPetugas = await prisma.user.findUnique({
         where: {
-          userLevelId: "PETUGAS",
+          no_identitas: "4001",
         },
       });
-      if (countPetugas === 0) {
-        const unit = await prisma.unit.create({
-          data: {
-            id: ulid(),
-            nama_unit: "Unit TI",
-            kepalaUnitId: "5001",
-          },
-        });
 
-        await prisma.user.update({
-          where: {
-            no_identitas: unit.kepalaUnitId,
-          },
-          data: {
-            unitId: unit.id,
-          },
-        });
+      // Create the unit first
+      const unit = await prisma.unit.create({
+        data: {
+          id: ulid(),
+          nama_unit: "Unit TI",
+          kepalaUnitId: "5001",
+        },
+      });
 
-        // Petugas seed with unit assignment
+      await prisma.user.update({
+        where: {
+          no_identitas: unit.kepalaUnitId,
+        },
+        data: {
+          unitId: unit.id,
+        },
+      });
+
+      // Only create the petugas user if it doesn't already exist
+      if (!existingPetugas) {
         const hashedPassword = await bcrypt.hash("petugas123", 12);
         await prisma.user.create({
           data: {
@@ -256,7 +259,20 @@ export async function seedAdmin(prisma: PrismaClient) {
             unitId: unit.id,
           },
         });
-        console.log("Petugas and Unit seeded");
+        console.log("Petugas created and assigned to Unit TI");
+      } else {
+        // Update the existing petugas user with the unit if needed
+        if (!existingPetugas.unitId) {
+          await prisma.user.update({
+            where: {
+              no_identitas: "4001",
+            },
+            data: {
+              unitId: unit.id,
+            },
+          });
+          console.log("Existing Petugas updated with Unit TI assignment");
+        }
       }
     }
   }

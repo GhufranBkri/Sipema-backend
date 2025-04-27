@@ -27,7 +27,7 @@ unitRoutes.post(
 unitRoutes.post(
   "/petugas",
   AuthMiddleware.checkJwt,
-  // AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),
+  AuthMiddleware.checkAccess("UNIT", "addPetugas"),
   unitValidation.validateAddPetugasDTO,
   unitController.addPetugas
 );
@@ -35,8 +35,7 @@ unitRoutes.post(
 unitRoutes.put(
   "/petugas",
   AuthMiddleware.checkJwt,
-  // AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),
-
+  AuthMiddleware.checkAccess("UNIT", "removePetugas"),
   unitValidation.validateRemovePetugasDTO,
   unitController.removePetugas
 );
