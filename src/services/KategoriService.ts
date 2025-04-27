@@ -136,6 +136,15 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
         },
       });
 
+      // Also delete related PengaduanWBS records
+      await tx.pengaduanWBS.deleteMany({
+        where: {
+          kategoriId: {
+            in: idArray,
+          },
+        },
+      });
+
       // Then delete the categories
       await tx.kategori.deleteMany({
         where: {

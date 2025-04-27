@@ -26,9 +26,9 @@ KategoriRoutes.put(
 
 KategoriRoutes.delete(
   "/",
+  AuthMiddleware.checkJwt,
   AuthMiddleware.checkAccess("KATEGORI", "delete"),
   KategoriValidation.deleteValidationKatergori,
-  AuthMiddleware.checkJwt,
   KategoriController.deleteByIds
 );
 
