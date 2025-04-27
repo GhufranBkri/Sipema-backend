@@ -52,9 +52,10 @@ unitRoutes.put(
 
 unitRoutes.delete(
   "/",
+  AuthMiddleware.checkJwt,
   unitValidation.validationDeletedUnit,
   AuthMiddleware.checkAccess("UNIT", "delete"),
-  AuthMiddleware.checkJwt,
+
   unitController.deleteByIds
 );
 
