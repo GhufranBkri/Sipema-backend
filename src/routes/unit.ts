@@ -53,7 +53,6 @@ unitRoutes.delete(
   AuthMiddleware.checkJwt,
   unitValidation.validationDeletedUnit,
   AuthMiddleware.checkAccess("UNIT", "delete"),
-
   unitController.deleteByIds
 );
 

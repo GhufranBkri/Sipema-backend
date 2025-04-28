@@ -5,12 +5,12 @@ const UserLevelsRoutes = new Hono();
 
 UserLevelsRoutes.get("/", UserLevelsController.getAll);
 
-UserLevelsRoutes.get("/:id", UserLevelsController.getById);
+// UserLevelsRoutes.get("/:id", UserLevelsController.getById);
 
-UserLevelsRoutes.post("/", UserLevelsController.create);
+// UserLevelsRoutes.post("/", UserLevelsController.create);
 
-UserLevelsRoutes.put("/:id", UserLevelsController.update);
+// UserLevelsRoutes.put("/:id", UserLevelsController.update);
 
-UserLevelsRoutes.delete("/", UserLevelsController.deleteByIds);
+// UserLevelsRoutes.delete("/", UserLevelsController.deleteByIds);
 
 export default UserLevelsRoutes;
