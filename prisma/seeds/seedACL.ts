@@ -93,6 +93,22 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
       { subject: "UM_UNIT", action: ["read", "create", "update", "delete"] },
     ],
   },
+  PIMPINAN_UNIT: {
+    permissions: [
+      { subject: "PENGADUAN", action: ["read"] },
+      { subject: "PENGADUAN_MASYARAKAT", action: ["read"] },
+      { subject: "PENGADUAN_WBS", action: ["read"] },
+      { subject: "PEMBERITAHUAN_PETUGAS", action: ["create"] },
+    ],
+  },
+
+  PIMPINAN_UNIVERSITAS: {
+    permissions: [
+      { subject: "PENGADUAN", action: ["read"] },
+      { subject: "PENGADUAN_MASYARAKAT", action: ["read"] },
+      { subject: "PEMBERITAHUAN_PETUGAS", action: ["create"] },
+    ],
+  },
 };
 
 export async function seedAcl(prisma: PrismaClient): Promise<void> {

@@ -149,6 +149,35 @@ export async function seedAdmin(prisma: PrismaClient) {
     }
   }
 
+  // Pimpinan Universitas seed
+  const findPimpinanUniversitas = await prisma.userLevels.findUnique({
+    where: {
+      name: "PIMPINAN_UNIVERSITAS",
+    },
+  });
+  if (findPimpinanUniversitas) {
+    const countPimpinanUniversitas = await prisma.user.count({
+      where: {
+        userLevelId: findPimpinanUniversitas.id,
+      },
+    });
+    if (countPimpinanUniversitas === 0) {
+      const hashedPassword = await bcrypt.hash("pimpinan123", 12);
+      await prisma.user.create({
+        data: {
+          id: ulid(),
+          name: "Pimpinan Universitas",
+          no_identitas: "3002",
+          password: hashedPassword,
+          email: "pimpinan@test.com",
+          userLevelId: findPimpinanUniversitas.id,
+          program_studi: "PIMPINAN",
+        },
+      });
+      console.log("Pimpinan Universitas seeded");
+    }
+  }
+
   // Petugas Super seed
   const findPetugasSuper = await prisma.userLevels.findUnique({
     where: {

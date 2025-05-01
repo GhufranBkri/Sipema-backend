@@ -14,6 +14,8 @@ export async function seedUserLevels(prisma: PrismaClient) {
     "KEPALA_WBS",
     "PETUGAS",
     "KEPALA_PETUGAS_UNIT",
+    "PIMPINAN_UNIT",
+    "PIMPINAN_UNIVERSITAS",
   ];
 
   if (countUserLevels === 0) {

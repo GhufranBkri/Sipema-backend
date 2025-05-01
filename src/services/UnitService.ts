@@ -32,6 +32,7 @@ export async function create(
       return ConflictResponse("Unit with this name already exists");
     }
 
+    // Validate petugas if specified
     if (data.petugasId) {
       const petugasExists = await prisma.user.findUnique({
         where: { no_identitas: data.petugasId },
@@ -42,11 +43,24 @@ export async function create(
       }
     }
 
+    // Validate pimpinan unit
+    const pimpinanExists = await prisma.user.findUnique({
+      where: { no_identitas: data.pimpinanUnitId },
+    });
+
+    if (!pimpinanExists) {
+      return BadRequestWithMessage("Referenced Pimpinan Unit not found");
+    }
+
     const unit = await prisma.unit.create({
       data: {
-        ...data,
+        nama_unit: data.nama_unit,
+        jenis_unit: data.jenis_unit,
         kepalaUnit: {
           connect: { no_identitas: data.kepalaUnit },
+        },
+        pimpinanUnit: {
+          connect: { no_identitas: data.pimpinanUnitId },
         },
       },
     });
@@ -56,7 +70,6 @@ export async function create(
         where: {
           no_identitas: data.kepalaUnit,
         },
-
         data: {
           unitId: unit.id,
         },
@@ -72,7 +85,6 @@ export async function create(
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
-
 export type AddPetugasResponse = Unit | {};
 export async function addPetugas(
   data: AddPetugasDTO,

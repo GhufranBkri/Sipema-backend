@@ -17,6 +17,7 @@ export interface UnitCreateDTO {
   jenis_unit: jenisUnit;
   petugasId?: string | null;
   kepalaUnit: string;
+  pimpinanUnitId: string;
 }
 
 // DTO for updating Unit

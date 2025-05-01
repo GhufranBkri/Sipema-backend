@@ -126,7 +126,8 @@ export async function getAll(
 
     if (
       userLevel.name === "PETUGAS" ||
-      userLevel.name === "KEPALA_PETUGAS_UNIT"
+      userLevel.name === "KEPALA_PETUGAS_UNIT" ||
+      userLevel.name === "PIMPINAN_UNIT"
     ) {
       const officerUnit = await prisma.unit.findFirst({
         where: {

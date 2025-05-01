@@ -18,6 +18,10 @@ export async function seedUnit(prisma: PrismaClient) {
     where: { name: "PETUGAS" },
   });
 
+  const pimpinanUserLevel = await prisma.userLevels.findUnique({
+    where: { name: "PIMPINAN_UNIT" },
+  });
+
   // List of faculties
   const faculties = [
     "Fakultas Ekonomi dan Bisnis",
@@ -38,6 +42,7 @@ export async function seedUnit(prisma: PrismaClient) {
   // Initialize sequential counters
   let kepalaCounter = 6001;
   let petugasCounter = 4001;
+  let pimpinanCounter = 7001;
 
   // Create units and associated users
   for (const faculty of faculties) {
@@ -80,6 +85,22 @@ export async function seedUnit(prisma: PrismaClient) {
     });
     petugasCounter++; // Increment counter
 
+    // Create pimpinan unit user
+    const pimpinanUnit = await prisma.user.create({
+      data: {
+        id: ulid(),
+        email: `pimpinan.${shortName.toLowerCase()}@example.com`,
+        no_identitas: pimpinanCounter.toString(),
+        name: `Pimpinan ${faculty}`,
+        password: await bcrypt.hash("password123", 10),
+        userLevelId: pimpinanUserLevel?.id ?? "",
+        no_telphone: `08123456${Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0")}`,
+      },
+    });
+    pimpinanCounter++; // Increment counter
+
     // Create the unit
     await prisma.unit.create({
       data: {
@@ -87,6 +108,7 @@ export async function seedUnit(prisma: PrismaClient) {
         nama_unit: faculty,
         jenis_unit: "FAKULTAS",
         kepalaUnitId: headUser.no_identitas,
+        pimpinanUnitId: pimpinanUnit.no_identitas,
         petugas: {
           connect: { no_identitas: staffUser.no_identitas },
         },

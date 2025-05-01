@@ -42,6 +42,7 @@ model User {
   pengaduan     Pengaduan[]
   pengaduanWBS  PengaduanWBS[] @relation("pelapor")
   unit_kepala   Unit?          @relation("kepalaUnit")
+  unit_pimpinan Unit?          @relation("pimpinanUnit")
   unit_petugas  Unit?          @relation("petugas", fields: [unitId], references: [id])
   userLevel     UserLevels     @relation(fields: [userLevelId], references: [id])
 }
@@ -93,9 +94,11 @@ model Unit {
   nama_unit    String      @unique
   jenis_unit  jenisUnit
   kepalaUnitId String      @unique
+  pimpinanUnitId String @unique
   pengaduan    Pengaduan[]
   kepalaUnit   User        @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
   petugas      User[]      @relation("petugas")
+  pimpinanUnit User       @relation("pimpinanUnit", fields: [pimpinanUnitId], references: [no_identitas])
 }
 
 model Kategori {
