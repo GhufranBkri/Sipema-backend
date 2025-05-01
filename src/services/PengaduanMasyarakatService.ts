@@ -79,10 +79,7 @@ export async function getAll(
       return INVALID_ID_SERVICE_RESPONSE;
     }
 
-    if (
-      userLevel.name === "PETUGAS" ||
-      userLevel.name === "KEPALA_PETUGAS_UNIT"
-    ) {
+    if (userLevel.name === "PETUGAS") {
       const officerUnit = await prisma.unit.findFirst({
         where: {
           petugas: {
@@ -97,6 +94,42 @@ export async function getAll(
 
       usedFilters.where.AND.push({
         unitId: officerUnit.id, // Menggunakan nameUnit bukan unit
+      });
+    }
+
+    if (userLevel.name === "KEPALA_PETUGAS_UNIT") {
+      const unitLedByUser = await prisma.unit.findFirst({
+        where: {
+          kepalaUnitId: user.no_identitas,
+        },
+      });
+
+      if (!unitLedByUser) {
+        return BadRequestWithMessage(
+          "You are not assigned as the head of any unit"
+        );
+      }
+
+      usedFilters.where.AND.push({
+        unitId: unitLedByUser.id,
+      });
+    }
+
+    if (userLevel.name === "PIMPINAN_UNIT") {
+      const unitLedByUser = await prisma.unit.findFirst({
+        where: {
+          pimpinanUnitId: user.no_identitas,
+        },
+      });
+
+      if (!unitLedByUser) {
+        return BadRequestWithMessage(
+          "You are not assigned as the head of any unit"
+        );
+      }
+
+      usedFilters.where.AND.push({
+        unitId: unitLedByUser.id,
       });
     }
 

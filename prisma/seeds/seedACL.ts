@@ -107,6 +107,7 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
       { subject: "PENGADUAN", action: ["read"] },
       { subject: "PENGADUAN_MASYARAKAT", action: ["read"] },
       { subject: "PEMBERITAHUAN_PETUGAS", action: ["create"] },
+      { subject: "PENGADUAN_WBS", action: ["read"] },
     ],
   },
 };

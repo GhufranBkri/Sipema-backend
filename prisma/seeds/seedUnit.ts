@@ -69,22 +69,6 @@ export async function seedUnit(prisma: PrismaClient) {
     });
     kepalaCounter++; // Increment counter
 
-    // Create staff user
-    const staffUser = await prisma.user.create({
-      data: {
-        id: ulid(),
-        email: `petugas.${shortName.toLowerCase()}@example.com`,
-        no_identitas: petugasCounter.toString(),
-        name: `Petugas ${faculty}`,
-        password: await bcrypt.hash("password123", 10),
-        userLevelId: petugasUserLevel?.id ?? "",
-        no_telphone: `08123456${Math.floor(Math.random() * 10000)
-          .toString()
-          .padStart(4, "0")}`,
-      },
-    });
-    petugasCounter++; // Increment counter
-
     // Create pimpinan unit user
     const pimpinanUnit = await prisma.user.create({
       data: {
@@ -100,6 +84,22 @@ export async function seedUnit(prisma: PrismaClient) {
       },
     });
     pimpinanCounter++; // Increment counter
+
+    // Create staff user
+    const staffUser = await prisma.user.create({
+      data: {
+        id: ulid(),
+        email: `petugas.${shortName.toLowerCase()}@example.com`,
+        no_identitas: petugasCounter.toString(),
+        name: `Petugas ${faculty}`,
+        password: await bcrypt.hash("password123", 10),
+        userLevelId: petugasUserLevel?.id ?? "",
+        no_telphone: `08123456${Math.floor(Math.random() * 10000)
+          .toString()
+          .padStart(4, "0")}`,
+      },
+    });
+    petugasCounter++; // Increment counter
 
     // Create the unit
     await prisma.unit.create({
