@@ -1,4 +1,3 @@
-// schema.prisma
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["postgresqlExtensions"]
@@ -6,8 +5,153 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("POSTGRES_PRISMA_URL") // uses connection pooling
-  directUrl = env("POSTGRES_URL_NON_POOLING") // Used for migrations
+  url       = env("POSTGRES_PRISMA_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Notification {
+  id             String           @id @default(cuid())
+  message        String
+  isRead         Boolean          @default(false)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  type           NotificationType
+  userId         String
+  pengaduanId    String?
+  title          String
+  pengaduanWBSId String?
+  pengaduan      Pengaduan?       @relation(fields: [pengaduanId], references: [id])
+  pengaduanWBS   PengaduanWBS?    @relation(fields: [pengaduanWBSId], references: [id])
+  user           User             @relation(fields: [userId], references: [no_identitas])
+}
+
+
+model User {
+  id            String         @id @default(cuid())
+  email         String
+  no_identitas  String         @unique
+  name          String
+  password      String
+  program_studi String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  unitId        String?
+  no_telphone   String?
+  userLevelId   String
+  notifications Notification[]
+  pengaduan     Pengaduan[]
+  pengaduanWBS  PengaduanWBS[] @relation("pelapor")
+  unit_kepala   Unit?          @relation("kepalaUnit")
+  unit_petugas  Unit?          @relation("petugas", fields: [unitId], references: [id])
+  userLevel     UserLevels     @relation(fields: [userLevelId], references: [id])
+}
+
+model UserLevels {
+  id        String   @id
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  acl       Acl[]
+  users     User[]
+}
+
+model Features {
+  id        String    @id
+  name      String    @unique
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  acl       Acl[]
+  actions   Actions[]
+}
+
+model Actions {
+  id          String   @id
+  name        String
+  namaFeature String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  feature     Features @relation(fields: [namaFeature], references: [name])
+
+  @@unique([namaFeature, name])
+}
+
+model Acl {
+  id          String     @id
+  namaFeature String
+  namaAction  String
+  userLevelId String
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  feature     Features   @relation(fields: [namaFeature], references: [name])
+  userLevel   UserLevels @relation(fields: [userLevelId], references: [id])
+
+  @@unique([namaFeature, namaAction, userLevelId])
+}
+
+model Unit {
+  id           String      @id @default(cuid())
+  nama_unit    String      @unique
+  jenis_unit  jenisUnit
+  kepalaUnitId String      @unique
+  pengaduan    Pengaduan[]
+  kepalaUnit   User        @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
+  petugas      User[]      @relation("petugas")
+}
+
+model Kategori {
+  id           String         @id @default(cuid())
+  nama         String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  isWBS        Boolean        @default(false)
+  pengaduan    Pengaduan[]
+  pengaduanWBS PengaduanWBS[]
+}
+
+model PengaduanWBS {
+  id              String         @id @default(cuid())
+  judul           String
+  deskripsi       String
+  pihakTerlibat   String
+  tanggalKejadian DateTime
+  lokasi          String
+  kategoriId      String
+  unit            String
+  pelaporId       String
+  status          Status         @default(PENDING)
+  approvedBy      String?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  response        String?
+  filePendukung   String?
+  filePetugas     String?
+  notfications    Notification[]
+  kategori        Kategori       @relation(fields: [kategoriId], references: [id])
+  pelapor         User           @relation("pelapor", fields: [pelaporId], references: [no_identitas])
+}
+
+model Pengaduan {
+  id              String         @id @default(cuid())
+  judul           String
+  deskripsi       String
+  kategoriId      String
+  pelaporId       String?
+  status          Status         @default(PENDING)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  filePendukung   String?
+  response        String?
+  filePetugas     String?
+  harapan_pelapor String?
+  approvedBy      String?
+  nama            String?
+  no_telphone     String?
+  tipePengaduan   TypePengaduan
+  unitId          String
+  notfications    Notification[]
+  kategori        Kategori       @relation(fields: [kategoriId], references: [id])
+  pelapor         User?          @relation(fields: [pelaporId], references: [no_identitas])
+  unit            Unit           @relation(fields: [unitId], references: [id])
 }
 
 enum Roles {
@@ -22,7 +166,6 @@ enum Roles {
   KEPALA_PETUGAS_UNIT
 }
 
-
 enum TypePengaduan {
   USER
   MASYARAKAT
@@ -35,158 +178,16 @@ enum Status {
   COMPLETED
 }
 
+enum jenisUnit {
+  FAKULTAS
+  UPT
+  DIREKTORAT
+  LEMBAGA
+}
+
 enum NotificationType {
   NEW_REPORT
   REPORT_UPDATED
   REPORT_IN_PROCESS
   REMINDER
-}
-
-model Notification {
-  id                   String           @id @default(cuid())
-  userId               String
-  title                String
-  message              String
-  isRead               Boolean          @default(false)
-  createdAt            DateTime         @default(now())
-  updatedAt            DateTime         @updatedAt
-  type                 NotificationType
-  user                 User             @relation(fields: [userId], references: [no_identitas])
-  
-  pengaduanId          String?
-  pengaduan            Pengaduan?       @relation(fields: [pengaduanId], references: [id])
-
-  
-  pengaduanWBSId       String?
-  pengaduanWBS         PengaduanWBS?    @relation(fields: [pengaduanWBSId], references: [id])
-}
-
-model User {
-  id            String      @id @default(cuid())
-  email         String
-  no_identitas  String      @unique
-  name          String
-  password      String
-  program_studi String?
-  no_telphone   String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  pengaduan     Pengaduan[] 
-  pengaduanWBS  PengaduanWBS[] @relation("pelapor")
-  notifications Notification[] 
-  unit_petugas  Unit?     @relation("petugas", fields: [unitId], references: [id])
-  unitId        String?
-  unit_kepala   Unit?     @relation("kepalaUnit")
-  userLevelId   String
-  userLevel     UserLevels @relation(fields: [userLevelId], references: [id])
-}
-
-model UserLevels {
-  id         String       @id
-  name       String       @unique
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  users      User[]
-  acl        Acl[]
-
-}
-
-model Features {
-  id        String   @id
-  name      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  actions Actions[]
-  acl     Acl[]
-}
-
-model Actions {
-  id          String   @id
-  name        String
-  namaFeature String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  feature Features @relation(fields: [namaFeature], references: [name])
-  @@unique([namaFeature, name])
-}
-
-model Acl {
-  id          String   @id
-  namaFeature String
-  namaAction  String
-  userLevelId String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  feature   Features   @relation(fields: [namaFeature], references: [name])
-  userLevel UserLevels @relation(fields: [userLevelId], references: [id])
-
-  @@unique([namaFeature, namaAction, userLevelId])
-}
-
-model Unit {
-  id                  String                @id @default(cuid())
-  nama_unit           String                @unique
-  pengaduan           Pengaduan[]
-  petugas             User[]                @relation("petugas")
-  kepalaUnit          User                  @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
-  kepalaUnitId        String                @unique
-}
-
-model Kategori {
-  id                  String                @id @default(cuid())
-  nama                String
-  pengaduan           Pengaduan[]
-  createdAt           DateTime              @default(now())
-  updatedAt           DateTime              @updatedAt
-  pengaduanWBS   PengaduanWBS[]
-  isWBS               Boolean               @default(false)
-}
-
-model PengaduanWBS {
-  id             String       @id  @default(cuid())
-  judul          String
-  deskripsi      String
-  pihakTerlibat  String
-  tanggalKejadian DateTime
-  lokasi         String
-  kategoriId     String 
-  unit           String
-  kategori       Kategori  @relation(fields: [kategoriId], references: [id])
-  pelaporId      String
-  pelapor        User      @relation("pelapor", fields: [pelaporId], references: [no_identitas])
-  status         Status     @default(PENDING)
-  notfications   Notification[]
-  approvedBy     String?
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  response       String?
-  filePendukung String?
-  filePetugas   String?
-}
-
-
-
-model Pengaduan {
-  id            String   @id @default(cuid())
-  judul         String
-  deskripsi     String
-  status        Status   @default(PENDING)
-  unit          Unit     @relation(fields: [unitId], references: [id])
-  pelaporId    String?
-  pelapor      User?     @relation(fields: [pelaporId], references: [no_identitas])
-  unitId      String
-  response      String?
-  kategori      Kategori @relation(fields: [kategoriId], references: [id])
-  kategoriId    String
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  nama          String?
-  filePendukung String?
-  notfications  Notification[]
-  approvedBy    String?
-  tipePengaduan TypePengaduan
-  no_telphone   String?
-  filePetugas   String?
-  harapan_pelapor String?
 }

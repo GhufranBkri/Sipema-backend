@@ -1,6 +1,6 @@
 // src/entities/Unit.ts
 
-import { User, Pengaduan } from "@prisma/client";
+import { User, Pengaduan, jenisUnit } from "@prisma/client";
 
 // Base Unit interface
 export interface Unit {
@@ -14,6 +14,7 @@ export interface Unit {
 // DTO for creating new Unit
 export interface UnitCreateDTO {
   nama_unit: string;
+  jenis_unit: jenisUnit;
   petugasId?: string | null;
   kepalaUnit: string;
 }

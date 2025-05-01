@@ -206,76 +206,77 @@ export async function seedAdmin(prisma: PrismaClient) {
     }
   }
 
-  // Find Unit first
-  const findUnit = await prisma.unit.findUnique({
-    where: {
-      nama_unit: "Unit TI",
-    },
-  });
-  if (!findUnit) {
-    const findPetugas = await prisma.userLevels.findUnique({
-      where: {
-        name: "PETUGAS",
-      },
-    });
-    if (findPetugas) {
-      // Check if the specific user with no_identitas "4001" exists
-      const existingPetugas = await prisma.user.findUnique({
-        where: {
-          no_identitas: "4001",
-        },
-      });
+  // // Find Unit first
+  // const findUnit = await prisma.unit.findUnique({
+  //   where: {
+  //     nama_unit: "Unit TI",
+  //   },
+  // });
+  // if (!findUnit) {
+  //   const findPetugas = await prisma.userLevels.findUnique({
+  //     where: {
+  //       name: "PETUGAS",
+  //     },
+  //   });
+  //   if (findPetugas) {
+  //     // Check if the specific user with no_identitas "4001" exists
+  //     const existingPetugas = await prisma.user.findUnique({
+  //       where: {
+  //         no_identitas: "4001",
+  //       },
+  //     });
 
-      // Create the unit first
-      const unit = await prisma.unit.create({
-        data: {
-          id: ulid(),
-          nama_unit: "Unit TI",
-          kepalaUnitId: "5001",
-        },
-      });
+  //     // Create the unit first
+  //     const unit = await prisma.unit.create({
+  //       data: {
+  //         id: ulid(),
+  //         jenis_unit: jenisUnit.FAKULTAS,
+  //         nama_unit: "Unit TI",
+  //         kepalaUnitId: "5001",
+  //       },
+  //     });
 
-      await prisma.user.update({
-        where: {
-          no_identitas: unit.kepalaUnitId,
-        },
-        data: {
-          unitId: unit.id,
-        },
-      });
+  //     await prisma.user.update({
+  //       where: {
+  //         no_identitas: unit.kepalaUnitId,
+  //       },
+  //       data: {
+  //         unitId: unit.id,
+  //       },
+  //     });
 
-      // Only create the petugas user if it doesn't already exist
-      if (!existingPetugas) {
-        const hashedPassword = await bcrypt.hash("petugas123", 12);
-        await prisma.user.create({
-          data: {
-            id: ulid(),
-            name: "Petugas Unit TI",
-            no_identitas: "4001",
-            password: hashedPassword,
-            email: "petugas@test.com",
-            userLevelId: findPetugas.id,
-            program_studi: "Teknik Informatika",
-            unitId: unit.id,
-          },
-        });
-        console.log("Petugas created and assigned to Unit TI");
-      } else {
-        // Update the existing petugas user with the unit if needed
-        if (!existingPetugas.unitId) {
-          await prisma.user.update({
-            where: {
-              no_identitas: "4001",
-            },
-            data: {
-              unitId: unit.id,
-            },
-          });
-          console.log("Existing Petugas updated with Unit TI assignment");
-        }
-      }
-    }
-  }
+  //     // Only create the petugas user if it doesn't already exist
+  //     if (!existingPetugas) {
+  //       const hashedPassword = await bcrypt.hash("petugas123", 12);
+  //       await prisma.user.create({
+  //         data: {
+  //           id: ulid(),
+  //           name: "Petugas Unit TI",
+  //           no_identitas: "4001",
+  //           password: hashedPassword,
+  //           email: "petugas@test.com",
+  //           userLevelId: findPetugas.id,
+  //           program_studi: "Teknik Informatika",
+  //           unitId: unit.id,
+  //         },
+  //       });
+  //       console.log("Petugas created and assigned to Unit TI");
+  //     } else {
+  //       // Update the existing petugas user with the unit if needed
+  //       if (!existingPetugas.unitId) {
+  //         await prisma.user.update({
+  //           where: {
+  //             no_identitas: "4001",
+  //           },
+  //           data: {
+  //             unitId: unit.id,
+  //           },
+  //         });
+  //         console.log("Existing Petugas updated with Unit TI assignment");
+  //       }
+  //     }
+  //   }
+  // }
 
   console.log("All user seeding completed");
 }
