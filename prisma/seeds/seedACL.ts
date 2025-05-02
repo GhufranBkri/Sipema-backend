@@ -82,7 +82,10 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     ],
   },
   PETUGAS: {
-    permissions: [{ subject: "PENGADUAN", action: ["read", "update"] }],
+    permissions: [
+      { subject: "PENGADUAN", action: ["read", "update"] },
+      { subject: "PENGADUAN_MASYARAKAT", action: ["read", "update"] },
+    ],
   },
   KEPALA_PETUGAS_UNIT: {
     permissions: [
