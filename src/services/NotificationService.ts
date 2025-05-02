@@ -77,6 +77,21 @@ export async function sendAllertToOfficerAllert(
       notificationsSent++;
     }
 
+    const unit = await prisma.unit.findUnique({
+      where: {
+        id: pengaduan.unitId,
+      },
+    });
+
+    if (unit && unit.kepalaUnitId) {
+      await NotificationUtils.sendNewNotifyOfficerAlert(
+        pengaduan.judul,
+        unit.kepalaUnitId,
+        pengaduan.id
+      );
+      notificationsSent++;
+    }
+
     return {
       status: true,
       data: {
