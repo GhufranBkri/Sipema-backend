@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, jenisUnit } from "@prisma/client";
 import { ulid } from "ulid";
 import * as bcrypt from "bcrypt";
 
@@ -22,6 +22,35 @@ export async function seedUnit(prisma: PrismaClient) {
     where: { name: "PIMPINAN_UNIT" },
   });
 
+  const direktorat = [
+    "Direktorat Administrasi Akademik",
+    "Direktorat Kemahasiswaan dan Alumni",
+    "Direktorat Sumber Daya",
+    "Direktorat Perencanaan dan Kemitraan",
+    "Direktorat Keuangan",
+  ];
+
+  const LEMBAGA = [
+    "Lembaga Penelitian dan Pengabdian Kepada Masyarakat",
+    "Lembaga Penjaminan Mutu",
+  ];
+
+  const UPT = [
+    "UPT Perpustakaan dan E-Learning",
+    "UPT Teknologi Informasi dan Komunikasi",
+    "UPT Pusat Bahasa",
+    "UPT Laboratorium Terpadu",
+    "UPT Mitigasi Bencana",
+    "UPT Kewirausahaan",
+    "UPT Percetakan",
+    "UPT Mata Kuliah Umum",
+    "UPT KUI",
+    "UPT Asrama",
+    "UPT CDC",
+    "UPT Bimbingan Konseling",
+    "UPT Rumah Sakit Pendidikan",
+  ];
+
   // List of faculties
   const faculties = [
     "Fakultas Ekonomi dan Bisnis",
@@ -44,13 +73,16 @@ export async function seedUnit(prisma: PrismaClient) {
   let petugasCounter = 4001;
   let pimpinanCounter = 7001;
 
-  // Create units and associated users
-  for (const faculty of faculties) {
-    // Generate a shortcode from faculty name for ID purposes
-    const shortName = faculty
-      .replace("dan ", "")
+  // Helper function to create users and unit
+  const createUnitWithUsers = async (
+    unitName: string,
+    jenisUnit: jenisUnit
+  ) => {
+    // Generate a shortcode from name for ID purposes
+    const shortName = unitName
+      .replace(/UPT |Fakultas |Sekolah |dan |Ilmu /g, "")
       .split(" ")
-      .map((word) => word[0])
+      .map((word: string) => word[0])
       .join("");
 
     // Create head user
@@ -59,7 +91,7 @@ export async function seedUnit(prisma: PrismaClient) {
         id: ulid(),
         email: `kepala.${shortName.toLowerCase()}@example.com`,
         no_identitas: kepalaCounter.toString(),
-        name: `Kepala ${faculty}`,
+        name: `Kepala ${unitName}`,
         password: await bcrypt.hash("password123", 10),
         userLevelId: kepalaUserLevel?.id ?? "",
         no_telphone: `08123456${Math.floor(Math.random() * 10000)
@@ -75,7 +107,7 @@ export async function seedUnit(prisma: PrismaClient) {
         id: ulid(),
         email: `pimpinan.${shortName.toLowerCase()}@example.com`,
         no_identitas: pimpinanCounter.toString(),
-        name: `Pimpinan ${faculty}`,
+        name: `Pimpinan ${unitName}`,
         password: await bcrypt.hash("password123", 10),
         userLevelId: pimpinanUserLevel?.id ?? "",
         no_telphone: `08123456${Math.floor(Math.random() * 10000)
@@ -91,7 +123,7 @@ export async function seedUnit(prisma: PrismaClient) {
         id: ulid(),
         email: `petugas.${shortName.toLowerCase()}@example.com`,
         no_identitas: petugasCounter.toString(),
-        name: `Petugas ${faculty}`,
+        name: `Petugas ${unitName}`,
         password: await bcrypt.hash("password123", 10),
         userLevelId: petugasUserLevel?.id ?? "",
         no_telphone: `08123456${Math.floor(Math.random() * 10000)
@@ -105,8 +137,8 @@ export async function seedUnit(prisma: PrismaClient) {
     await prisma.unit.create({
       data: {
         id: ulid(),
-        nama_unit: faculty,
-        jenis_unit: "FAKULTAS",
+        nama_unit: unitName,
+        jenis_unit: jenisUnit,
         kepalaUnitId: headUser.no_identitas,
         pimpinanUnitId: pimpinanUnit.no_identitas,
         petugas: {
@@ -115,7 +147,25 @@ export async function seedUnit(prisma: PrismaClient) {
       },
     });
 
-    console.log(`Created unit: ${faculty}`);
+    console.log(`Created unit: ${unitName}`);
+  };
+
+  // Create faculties and associated users
+  for (const faculty of faculties) {
+    await createUnitWithUsers(faculty, "FAKULTAS");
+  }
+
+  // Create UPT units and associated users
+  for (const uptUnit of UPT) {
+    await createUnitWithUsers(uptUnit, "UPT");
+  }
+
+  for (const lembagaUnit of LEMBAGA) {
+    await createUnitWithUsers(lembagaUnit, "LEMBAGA");
+  }
+
+  for (const direktoratUnit of direktorat) {
+    await createUnitWithUsers(direktoratUnit, "DIREKTORAT");
   }
 
   console.log("Units and associated users seeded successfully");
