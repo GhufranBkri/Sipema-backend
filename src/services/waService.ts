@@ -22,7 +22,8 @@ class WaService {
   }
   public async sendMessage(
     to: string,
-    templateData: PengaduanDTO
+    data: PengaduanDTO,
+    id: string
   ): Promise<ServiceResponse<SendMessageResponse>> {
     const cleanNumber = to.replace(/\D/g, "");
     const formattedNumber = cleanNumber.startsWith("62")
@@ -30,17 +31,17 @@ class WaService {
       : `62${cleanNumber.substring(1)}`;
 
     // Ensure all values have fallbacks to prevent "missing text value" errors
-    const nama = templateData.nama || "Pelapor";
-    const id = templateData.id || "ID-UNKNOWN";
-    const judul = templateData.judul || "Tidak ada judul";
-    const deskripsi = templateData.deskripsi || "Tidak ada deskripsi";
+    const nama = data.nama || "Pelapor";
+    // const id = data.id || "ID-UNKNOWN";
+    const judul = data.judul || "Tidak ada judul";
+    const deskripsi = data.deskripsi || "Tidak ada deskripsi";
     const tanggal = new Date().toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
 
-    const data = {
+    const datatemplate = {
       data: {
         body_variables: [nama, id, judul, deskripsi, tanggal],
       },
@@ -50,7 +51,7 @@ class WaService {
           first_name: nama,
           last_name: "", // Separate last name to prevent undefined
           attributes: {
-            pengaduan_id: id,
+            id,
             judul: judul,
             deskripsi: deskripsi,
           },
@@ -62,7 +63,7 @@ class WaService {
     };
 
     try {
-      const response = await axios.post(this.apiUrl, data, {
+      const response = await axios.post(this.apiUrl, datatemplate, {
         headers: {
           "Content-Type": "application/json",
         },

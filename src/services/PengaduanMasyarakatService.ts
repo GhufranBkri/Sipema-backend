@@ -30,7 +30,7 @@ export async function create(
 
     // Send WhatsApp notification
     if (data.no_telphone) {
-      await waService.sendMessage(data.no_telphone, data);
+      await waService.sendMessage(data.no_telphone, data, pengaduan.id);
     }
 
     return {
