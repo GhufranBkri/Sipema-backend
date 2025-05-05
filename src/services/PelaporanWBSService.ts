@@ -69,6 +69,7 @@ export async function getAll(
     usedFilters.include = {
       pelapor: true,
       kategori: true,
+      unit: true,
     };
 
     const userLevel = await prisma.userLevels.findUnique({
