@@ -32,9 +32,12 @@ export async function create(
 
     if (!finduserLevel) return INVALID_ID_SERVICE_RESPONSE;
 
+    // Create a new object without userLevelName
+    const { userLevelName, ...userData } = data;
+
     const user = await prisma.user.create({
       data: {
-        ...data,
+        ...userData,
         userLevelId: finduserLevel.id,
       },
     });

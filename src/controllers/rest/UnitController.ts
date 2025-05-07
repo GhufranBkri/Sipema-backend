@@ -69,10 +69,10 @@ export async function removePetugas(c: Context): Promise<TypedResponse> {
 }
 
 export async function getAllPetugas(c: Context): Promise<TypedResponse> {
-  const filters: FilteringQueryV2 = checkFilteringQueryV2(c);
+  // const filters: FilteringQueryV2 = checkFilteringQueryV2(c);
   const user: UserJWTDAO = c.get("jwtPayload");
 
-  const serviceResponse = await unitService.getAllPetugas(filters, user);
+  const serviceResponse = await unitService.getAllPetugas(user);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);

@@ -191,55 +191,6 @@ export async function deletePetugasByIds(
   }
 }
 
-export type GetAllPetugasResponse = PagedList<User[]> | {};
-export async function getAllPetugas(
-  filters: FilteringQueryV2,
-  user: UserJWTDAO
-): Promise<ServiceResponse<GetAllResponse>> {
-  try {
-    const usedFilters = buildFilterQueryLimitOffsetV2(filters);
-    usedFilters.include = {
-      unit_petugas: {
-        select: {
-          id: true,
-          nama_unit: true,
-        },
-      },
-      userLevel: {
-        select: {
-          name: true,
-        },
-      },
-    };
-    usedFilters.where = {
-      unitId: user.unitId ? user.unitId : undefined,
-    };
-
-    const [users, totalData] = await Promise.all([
-      prisma.user.findMany(usedFilters),
-      prisma.user.count({
-        where: usedFilters.where,
-      }),
-    ]);
-
-    let totalPage = 1;
-    if (totalData > usedFilters.take)
-      totalPage = Math.ceil(totalData / usedFilters.take);
-
-    return {
-      status: true,
-      data: {
-        entries: users,
-        totalData,
-        totalPage,
-      },
-    };
-  } catch (err) {
-    Logger.error(`UserService.getAll : ${err} `);
-    return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
-  }
-}
-
 export type GetAllResponse = PagedList<Unit[]> | {};
 export async function getAll(
   filters: FilteringQueryV2,
@@ -421,6 +372,68 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
     };
   } catch (err) {
     Logger.error(`unitService.deleteByIds : ${err}`);
+    return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
+  }
+}
+
+export type GetAllPetugasResponse = User[] | {};
+export async function getAllPetugas(
+  user: UserJWTDAO
+): Promise<ServiceResponse<GetAllPetugasResponse>> {
+  try {
+    // Find units where the user is either kepala unit or pimpinan unit
+    const unit = await prisma.unit.findFirst({
+      where: {
+        OR: [
+          { kepalaUnitId: user.no_identitas },
+          { pimpinanUnitId: user.no_identitas },
+        ],
+      },
+      select: {
+        id: true,
+        nama_unit: true,
+        kepalaUnitId: true,
+        pimpinanUnitId: true,
+      },
+    });
+
+    if (!unit) {
+      return BadRequestWithMessage(
+        "User is not a kepala unit or pimpinan unit of any unit"
+      );
+    }
+
+    // Fetch all petugas for the unit
+    const petugas = await prisma.user.findMany({
+      where: {
+        unitId: unit.id,
+        userLevel: {
+          name: "PETUGAS",
+        },
+      },
+      select: {
+        no_identitas: true,
+        name: true,
+        email: true,
+        program_studi: true,
+        no_telphone: true,
+        userLevel: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        createdAt: true,
+        updatedAt: true,
+      },
+    });
+
+    return {
+      status: true,
+      data: petugas,
+    };
+  } catch (err) {
+    Logger.error(`unitService.getAllPetugas : ${err}`);
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
