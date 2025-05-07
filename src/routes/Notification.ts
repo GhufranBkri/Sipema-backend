@@ -19,10 +19,22 @@ NotificationRoutes.post(
   NotificationController.notifyOfficerAlert
 );
 
-NotificationRoutes.get("/:id", NotificationController.getById);
+NotificationRoutes.get(
+  "/:id",
+  authMiddleware.checkJwt,
+  NotificationController.getById
+);
 
-NotificationRoutes.put("/:id", NotificationController.update);
+NotificationRoutes.put(
+  "/:id",
+  authMiddleware.checkJwt,
+  NotificationController.update
+);
 
-NotificationRoutes.delete("/", NotificationController.deleteByIds);
+NotificationRoutes.delete(
+  "/",
+  authMiddleware.checkJwt,
+  NotificationController.deleteByIds
+);
 
 export default NotificationRoutes;
