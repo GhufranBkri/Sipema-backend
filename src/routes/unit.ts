@@ -11,6 +11,7 @@ unitRoutes.get("/:id", unitController.getById);
 unitRoutes.get(
   "/petugas/unit",
   AuthMiddleware.checkJwt,
+  AuthMiddleware.checkAccess("UNIT", "getAllPetugas"),
   // AuthMiddleware.checkRole([Roles.KEPALA_PETUGAS_UNIT]),
   unitController.getAllPetugas
 );

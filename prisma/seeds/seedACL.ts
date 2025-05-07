@@ -91,7 +91,10 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     permissions: [
       { subject: "PENGADUAN", action: ["read", "update", "delete"] },
       { subject: "PENGADUAN_MASYARAKAT", action: ["read", "update", "delete"] },
-      { subject: "UNIT", action: ["addPetugas", "removePetugas"] },
+      {
+        subject: "UNIT",
+        action: ["addPetugas", "removePetugas", "getAllPetugas"],
+      },
       // { subject: "USER_MANAGEMENT", action: ["read"] },
       { subject: "UM_UNIT", action: ["read", "create", "update", "delete"] },
     ],
@@ -100,6 +103,10 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
     permissions: [
       { subject: "PENGADUAN", action: ["read"] },
       { subject: "PENGADUAN_MASYARAKAT", action: ["read"] },
+      {
+        subject: "UNIT",
+        action: ["getAllPetugas"],
+      },
       { subject: "PENGADUAN_WBS", action: ["read"] },
       { subject: "PEMBERITAHUAN_PETUGAS", action: ["create"] },
     ],
