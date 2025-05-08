@@ -251,12 +251,12 @@ export async function getAll(
 
 export type GetByIdResponse = Unit | {};
 export async function getById(
-  nama_unit: string
+  id: string
 ): Promise<ServiceResponse<GetByIdResponse>> {
   try {
     let Unit = await prisma.unit.findUnique({
       where: {
-        nama_unit,
+        id,
       },
     });
 
