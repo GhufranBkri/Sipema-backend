@@ -81,7 +81,7 @@ export async function getAllPetugas(c: Context): Promise<TypedResponse> {
   return response_success(
     c,
     serviceResponse.data,
-    "Successfully fetched all unit!"
+    "Successfully fetched all officers in the unit!"
   );
 }
 

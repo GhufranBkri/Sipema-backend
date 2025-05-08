@@ -31,6 +31,10 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
       { subject: "UNIT", action: ["read", "create", "update", "delete"] },
       { subject: "KATEGORI", action: ["read", "create", "update", "delete"] },
       {
+        subject: "KATEGORI_WBS",
+        action: ["read", "create", "update", "delete"],
+      },
+      {
         subject: "USER_MANAGEMENT",
         action: ["read", "create", "update", "delete"],
       },
