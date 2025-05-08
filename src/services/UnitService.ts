@@ -417,6 +417,12 @@ export async function getAllPetugas(
         email: true,
         program_studi: true,
         no_telphone: true,
+        unit_petugas: {
+          select: {
+            id: true,
+            nama_unit: true,
+          },
+        },
         userLevel: {
           select: {
             id: true,
