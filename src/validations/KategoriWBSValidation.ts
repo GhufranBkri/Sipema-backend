@@ -25,10 +25,6 @@ export async function validateKategoriWBSDTO(c: Context, next: Next) {
 
   if (!data.nama)
     invalidFields.push(generateErrorStructure("nama", "nama cannot be empty"));
-  if (!data.deskripsi)
-    invalidFields.push(
-      generateErrorStructure("deskripsi", "deskripsi cannot be empty")
-    );
 
   if (!data) invalidFields.push(generateErrorStructure("", " cannot be empty"));
 

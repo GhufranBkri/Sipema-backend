@@ -91,13 +91,36 @@ export async function addPetugas(
   user: UserJWTDAO
 ): Promise<ServiceResponse<AddPetugasResponse>> {
   try {
-    // Update unitId for all specified users
+    // Find the unit where the user is either kepala unit or pimpinan unit
+    const unit = await prisma.unit.findFirst({
+      where: {
+        OR: [
+          { kepalaUnitId: user.no_identitas },
+          { pimpinanUnitId: user.no_identitas },
+        ],
+      },
+    });
+
+    if (!unit) {
+      return BadRequestWithMessage(
+        "User is not a kepala unit or pimpinan unit of any unit"
+      );
+    }
+
+    // Update unitId for all specified users using the found unit's ID
     const updateResults = await Promise.all(
       data.petugasIds.map(async (id) => {
+        const petugas = await prisma.user.findUnique({
+          where: { no_identitas: id },
+        });
+        if (!petugas) {
+          throw new Error(`Petugas with ID ${id} not found`);
+        }
+
         return prisma.user.update({
           where: { no_identitas: id },
           data: {
-            unitId: user.unitId,
+            unitId: unit.id, // Use the found unit.id instead of user.unitId
           },
           select: {
             no_identitas: true,
@@ -131,9 +154,26 @@ export async function deletePetugasByIds(
 ): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(petugasIds);
-    const unitId = user.unitId;
 
-    // Get valid user IDs - we can skip validation as it's done in middleware
+    // Find the unit where the user is either kepala unit or pimpinan unit
+    const unit = await prisma.unit.findFirst({
+      where: {
+        OR: [
+          { kepalaUnitId: user.no_identitas },
+          { pimpinanUnitId: user.no_identitas },
+        ],
+      },
+    });
+
+    if (!unit) {
+      return BadRequestWithMessage(
+        "User is not a kepala unit or pimpinan unit of any unit"
+      );
+    }
+
+    const unitId = unit.id;
+
+    // Get valid user IDs
     const existingUsers = await prisma.user.findMany({
       where: {
         no_identitas: { in: idArray },
@@ -204,6 +244,7 @@ export async function getAll(
       kepalaUnit: false,
       petugas: false,
       kepalaUnitId: false,
+      pimpinanUnitId: false,
     };
 
     // Only proceed with user-specific includes if user is authenticated

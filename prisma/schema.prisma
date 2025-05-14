@@ -157,17 +157,6 @@ model Pengaduan {
   unit            Unit           @relation(fields: [unitId], references: [id])
 }
 
-enum Roles {
-  TENAGA_KEPENDIDIKAN
-  MAHASISWA
-  DOSEN
-  ADMIN
-  PETUGAS_SUPER
-  PETUGAS_WBS
-  KEPALA_WBS
-  PETUGAS
-  KEPALA_PETUGAS_UNIT
-}
 
 enum TypePengaduan {
   USER

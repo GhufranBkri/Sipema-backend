@@ -123,17 +123,28 @@ export async function validateAddPetugasDTO(c: Context, next: Next) {
     return response_bad_request(c, "Validation Error", invalidFields);
   }
 
-  // Verify the unit exists
-  const unit = await prisma.unit.findUnique({
-    where: { id: user.unitId },
+  // Find the unit where the user is either kepala unit or pimpinan unit
+  const unit = await prisma.unit.findFirst({
+    where: {
+      OR: [
+        { kepalaUnitId: user.no_identitas },
+        { pimpinanUnitId: user.no_identitas },
+      ],
+    },
     include: { petugas: true },
   });
 
   if (!unit) {
-    invalidFields.push(generateErrorStructure("unit", "not found"));
+    invalidFields.push(
+      generateErrorStructure(
+        "unit",
+        "user is not a kepala unit or pimpinan unit of any unit"
+      )
+    );
     return response_bad_request(c, "Validation Error", invalidFields);
   }
 
+  // Continue with validations using the found unit.id instead of user.unitId
   // Check if all petugasIds exist and are PETUGAS
   const existingPetugas = await prisma.user.findMany({
     where: {
@@ -198,14 +209,24 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
     return response_bad_request(c, "Validation Error", invalidFields);
   }
 
-  // Verify the unit exists
-  const unit = await prisma.unit.findUnique({
-    where: { id: user.unitId },
+  // Find the unit where the user is either kepala unit or pimpinan unit
+  const unit = await prisma.unit.findFirst({
+    where: {
+      OR: [
+        { kepalaUnitId: user.no_identitas },
+        { pimpinanUnitId: user.no_identitas },
+      ],
+    },
     include: { petugas: true },
   });
 
   if (!unit) {
-    invalidFields.push(generateErrorStructure("unit", "not found"));
+    invalidFields.push(
+      generateErrorStructure(
+        "unit",
+        "user is not a kepala unit or pimpinan unit of any unit"
+      )
+    );
     return response_bad_request(c, "Validation Error", invalidFields);
   }
 
@@ -213,7 +234,7 @@ export async function validateRemovePetugasDTO(c: Context, next: Next) {
   const existingUsers = await prisma.user.findMany({
     where: {
       no_identitas: { in: data.petugasIds },
-      unitId: user.unitId,
+      unitId: unit.id, // Use unit.id instead of user.unitId
       userLevel: {
         name: "PETUGAS",
       },
