@@ -8,6 +8,7 @@ export interface PengaduanDTO {
   status: Status;
   unitId: string;
   response: string;
+  NIK?: string;
   kategoriId: string;
   nama?: string;
   no_telphone: string;

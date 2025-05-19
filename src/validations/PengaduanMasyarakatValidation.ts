@@ -14,6 +14,8 @@ export async function validatePengaduanMasyarakatDTO(c: Context, next: Next) {
     invalidFields.push(generateErrorStructure("deskripsi", "cannot be empty"));
   if (!data.judul)
     invalidFields.push(generateErrorStructure("judul", "cannot be empty"));
+  if (!data.NIK)
+    invalidFields.push(generateErrorStructure("NIK", "cannot be empty"));
   if (!data.kategoriId)
     invalidFields.push(generateErrorStructure("kategoriId", "cannot be empty"));
   if (!data.nama)

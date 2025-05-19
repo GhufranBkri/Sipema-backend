@@ -142,6 +142,7 @@ model Pengaduan {
   status          Status         @default(PENDING)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
+  NIK            String?
   filePendukung   String?
   response        String?
   filePetugas     String?
