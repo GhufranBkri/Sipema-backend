@@ -223,12 +223,26 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    idArray.forEach(async (id) => {
-      await prisma.pengaduan.delete({
-        where: {
-          id,
-        },
-      });
+    // Pastikan pelaporan ada sebelum menghapus
+    const existingReports = await prisma.pengaduan.findMany({
+      where: {
+        id: { in: idArray },
+      },
+      select: { id: true },
+    });
+
+    const existingIds = existingReports.map((r) => r.id);
+    const notFoundIds = idArray.filter((id) => !existingIds.includes(id));
+    if (notFoundIds.length > 0) {
+      return BadRequestWithMessage(
+        `Pengaduan dengan id berikut tidak ditemukan: ${notFoundIds.join(", ")}`
+      );
+    }
+
+    await prisma.pengaduan.deleteMany({
+      where: {
+        id: { in: idArray },
+      },
     });
 
     return {

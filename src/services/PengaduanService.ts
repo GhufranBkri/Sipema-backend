@@ -206,9 +206,9 @@ export async function getAll(
 export type GetTotalCountResponse =
   | { totalCount: number; totalCountMasyarakat: number }
   | {};
-export async function getTotalCount(): Promise<
-  ServiceResponse<GetTotalCountResponse>
-> {
+export async function getTotalCount(
+  user: UserJWTDAO
+): Promise<ServiceResponse<GetTotalCountResponse>> {
   try {
     const [totalCount, totalCountMasyarakat] = await Promise.all([
       prisma.pengaduan.count(),
@@ -333,12 +333,28 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    idArray.forEach(async (id) => {
-      await prisma.pengaduan.delete({
-        where: {
-          id,
-        },
-      });
+    // Check if all pengaduan exist
+    const foundPengaduan = await prisma.pengaduan.findMany({
+      where: {
+        id: { in: idArray },
+      },
+      select: { id: true },
+    });
+
+    const foundIds = foundPengaduan.map((p) => p.id);
+    const notFoundIds = idArray.filter((id) => !foundIds.includes(id));
+
+    if (notFoundIds.length > 0) {
+      return BadRequestWithMessage(
+        `Pengaduan with id(s) ${notFoundIds.join(", ")} not found`
+      );
+    }
+
+    // Delete all pengaduan
+    await prisma.pengaduan.deleteMany({
+      where: {
+        id: { in: idArray },
+      },
     });
 
     return {

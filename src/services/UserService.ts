@@ -157,10 +157,21 @@ export async function update(
     return INTERNAL_SERVER_ERROR_SERVICE_RESPONSE;
   }
 }
-
 export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
+
+    // Validate all no_identitas exist
+    const users = await prisma.user.findMany({
+      where: {
+        no_identitas: { in: idArray },
+      },
+      select: { no_identitas: true },
+    });
+
+    if (users.length !== idArray.length) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
 
     await Promise.all(
       idArray.map(async (no_identitas) => {
@@ -177,13 +188,15 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
       })
     );
 
-    idArray.forEach(async (no_identitas) => {
-      await prisma.user.delete({
-        where: {
-          no_identitas,
-        },
-      });
-    });
+    await Promise.all(
+      idArray.map(async (no_identitas) => {
+        await prisma.user.delete({
+          where: {
+            no_identitas,
+          },
+        });
+      })
+    );
 
     return {
       status: true,

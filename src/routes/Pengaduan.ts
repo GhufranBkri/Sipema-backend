@@ -5,7 +5,11 @@ import * as pengaudanValidation from "$validations/PengaduanValidation";
 
 const PengaduanRoutes = new Hono();
 
-PengaduanRoutes.get("/count", PengaduanController.getTotalCount);
+PengaduanRoutes.get(
+  "/count",
+  authMiddleware.decodeJwt,
+  PengaduanController.getTotalCount
+);
 
 PengaduanRoutes.get(
   "/",

@@ -208,12 +208,24 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    idArray.forEach(async (id) => {
-      await prisma.notification.delete({
-        where: {
-          id,
-        },
-      });
+    // Check if all notifications exist
+    const notifications = await prisma.notification.findMany({
+      where: {
+        id: { in: idArray },
+      },
+      select: { id: true },
+    });
+
+    if (notifications.length !== idArray.length) {
+      Logger.error(`Some notifications not found for IDs: ${ids}`);
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    // Delete notifications
+    await prisma.notification.deleteMany({
+      where: {
+        id: { in: idArray },
+      },
     });
 
     return {

@@ -45,7 +45,8 @@ export async function getAll(c: Context): Promise<TypedResponse> {
 }
 
 export async function getTotalCount(c: Context): Promise<TypedResponse> {
-  const serviceResponse = await PengaduanService.getTotalCount();
+  const user: UserJWTDAO = c.get("jwtPayload");
+  const serviceResponse = await PengaduanService.getTotalCount(user);
 
   if (!serviceResponse.status) {
     return handleServiceErrorWithResponse(c, serviceResponse);

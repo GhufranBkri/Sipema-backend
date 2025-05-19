@@ -223,12 +223,22 @@ export async function deleteByIds(ids: string): Promise<ServiceResponse<{}>> {
   try {
     const idArray: string[] = JSON.parse(ids);
 
-    idArray.forEach(async (id) => {
-      await prisma.pengaduanWBS.delete({
-        where: {
-          id,
-        },
-      });
+    // Check if all IDs exist before deleting
+    const foundItems = await prisma.pengaduanWBS.findMany({
+      where: {
+        id: { in: idArray },
+      },
+      select: { id: true },
+    });
+
+    if (foundItems.length !== idArray.length) {
+      return INVALID_ID_SERVICE_RESPONSE;
+    }
+
+    await prisma.pengaduanWBS.deleteMany({
+      where: {
+        id: { in: idArray },
+      },
     });
 
     return {
