@@ -24,6 +24,7 @@ export interface UnitCreateDTO {
 export interface UnitUpdateDTO {
   nama_unit?: string;
   petugasId?: string | null;
+  isActive?: boolean;
   kepalaUnit?: string;
 }
 

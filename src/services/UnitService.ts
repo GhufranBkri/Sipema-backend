@@ -239,6 +239,12 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
+    // Filter only active units
+    usedFilters.where = {
+      ...usedFilters.where,
+      isActive: true,
+    };
+
     // Default include settings for public access
     usedFilters.include = {
       kepalaUnit: false,

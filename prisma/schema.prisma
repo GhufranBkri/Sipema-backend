@@ -90,15 +90,16 @@ model Acl {
 }
 
 model Unit {
-  id           String      @id @default(cuid())
-  nama_unit    String      @unique
-  jenis_unit  jenisUnit
-  kepalaUnitId String      @unique
-  pimpinanUnitId String @unique
-  pengaduan    Pengaduan[]
-  kepalaUnit   User        @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
-  petugas      User[]      @relation("petugas")
-  pimpinanUnit User       @relation("pimpinanUnit", fields: [pimpinanUnitId], references: [no_identitas])
+  id             String      @id @default(cuid())
+  nama_unit      String      @unique
+  jenis_unit     jenisUnit
+  kepalaUnitId   String      @unique
+  pimpinanUnitId String      @unique
+  isActive       Boolean     @default(true)
+  pengaduan      Pengaduan[]
+  kepalaUnit     User        @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
+  petugas        User[]      @relation("petugas")
+  pimpinanUnit   User        @relation("pimpinanUnit", fields: [pimpinanUnitId], references: [no_identitas])
 }
 
 model Kategori {
