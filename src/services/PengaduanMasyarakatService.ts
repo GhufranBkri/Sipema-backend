@@ -65,16 +65,9 @@ export async function getAll(
 
     // Tambahkan filter tipePengaduan
     usedFilters.where.AND.push({
-      tipePengaduan: TypePengaduan.USER,
+      tipePengaduan: TypePengaduan.MASYARAKAT,
     });
 
-    usedFilters.where = {
-      AND: [
-        {
-          tipePengaduan: TypePengaduan.MASYARAKAT,
-        },
-      ],
-    };
     usedFilters.include = {
       unit: {
         include: {
