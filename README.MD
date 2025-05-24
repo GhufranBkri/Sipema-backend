@@ -1,7 +1,5 @@
 # Sipema Repositories for Backend
 
-# test untuk auto pull bismillah bisa
-
 ## Tech Stacks
 
 - Language : TypeScript
