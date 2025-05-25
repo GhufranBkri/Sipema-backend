@@ -126,6 +126,7 @@ export async function getAll(
           select: {
             id: true,
             nama_unit: true,
+            jenis_unit: true,
           },
         },
         kategori: true,
