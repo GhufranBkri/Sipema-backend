@@ -96,6 +96,8 @@ model Unit {
   kepalaUnitId   String      @unique
   pimpinanUnitId String      @unique
   isActive       Boolean     @default(true)
+  createdAt      DateTime    @default(now())
+  updatedAt    DateTime       @updatedAt
   pengaduan      Pengaduan[]
   kepalaUnit     User        @relation("kepalaUnit", fields: [kepalaUnitId], references: [no_identitas])
   petugas        User[]      @relation("petugas")
