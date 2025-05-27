@@ -239,12 +239,6 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
-    // Filter only active units
-    usedFilters.where = {
-      ...usedFilters.where,
-      isActive: true,
-    };
-
     // Default include settings for public access
     usedFilters.include = {
       kepalaUnit: false,
@@ -252,6 +246,11 @@ export async function getAll(
       kepalaUnitId: false,
       pimpinanUnitId: false,
     };
+
+    // Pastikan where sudah diinisialisasi
+    if (!usedFilters.where) {
+      usedFilters.where = {};
+    }
 
     // Only proceed with user-specific includes if user is authenticated
     if (user?.userLevelId) {
@@ -271,6 +270,20 @@ export async function getAll(
           petugas: true,
         };
       }
+
+      // Filter only active units for non-admin users
+      if (userLevel?.name !== "ADMIN") {
+        usedFilters.where = {
+          ...usedFilters.where,
+          isActive: true,
+        };
+      }
+    } else {
+      // Filter for public/unauthenticated users
+      usedFilters.where = {
+        ...usedFilters.where,
+        isActive: true,
+      };
     }
 
     const [units, totalData] = await Promise.all([
