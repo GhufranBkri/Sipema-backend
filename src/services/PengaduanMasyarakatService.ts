@@ -51,18 +51,6 @@ export async function getAll(
   try {
     const usedFilters = buildFilterQueryLimitOffsetV2(filters);
 
-    // petugas universiatas can only see pengaduan masyarakat
-
-    // Pastikan where ada
-    if (!usedFilters.where) {
-      usedFilters.where = {};
-    }
-
-    // Pastikan array AND ada
-    if (!usedFilters.where.AND) {
-      usedFilters.where.AND = [];
-    }
-
     // Tambahkan filter tipePengaduan
     usedFilters.where.AND.push({
       tipePengaduan: TypePengaduan.MASYARAKAT,

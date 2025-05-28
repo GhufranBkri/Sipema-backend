@@ -63,13 +63,19 @@ const USER_LEVEL_PERMISSIONS: PermissionMap = {
 
   PETUGAS_SUPER: {
     permissions: [
-      { subject: "PENGADUAN", action: ["read", "update", "delete"] },
+      {
+        subject: "PENGADUAN",
+        action: ["read", "update", "delete", "viewIdentitas"],
+      },
       { subject: "PEMBERITAHUAN_PETUGAS", action: ["create"] },
       {
         subject: "PENGADUAN_WBS",
-        action: ["read", "create", "update", "delete"],
+        action: ["read", "create", "update", "delete", "viewIdentitas"],
       },
-      { subject: "PENGADUAN_MASYARAKAT", action: ["read", "update", "delete"] },
+      {
+        subject: "PENGADUAN_MASYARAKAT",
+        action: ["read", "update", "delete", "viewIdentitas"],
+      },
     ],
   },
 
