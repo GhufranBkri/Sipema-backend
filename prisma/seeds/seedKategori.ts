@@ -28,7 +28,6 @@ export async function seedKategori(prisma: PrismaClient) {
         nama: "Keamanan dan Ketertiban",
       },
     });
-
     await prisma.kategori.create({
       data: {
         nama: "kebersihan",

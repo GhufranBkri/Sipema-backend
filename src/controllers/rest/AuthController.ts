@@ -25,7 +25,7 @@ export async function register(c:Context):Promise<TypedResponse>{
         return handleServiceErrorWithResponse(c, serviceResponse)
     }
 
-    return response_success(c, serviceResponse.data, "Successfully Logged In!");
+    return response_success(c, serviceResponse.data, "Successfully Registered!");
 }
 
 export async function verifyToken(c:Context):Promise<TypedResponse>{

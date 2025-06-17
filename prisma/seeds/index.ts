@@ -13,7 +13,6 @@ async function seed() {
   await seedAcl(prisma);
   await seedKategori(prisma);
   await seedUnit(prisma);
-
   await seedKategoriWBS(prisma);
 }
 
