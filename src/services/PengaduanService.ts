@@ -33,7 +33,7 @@ export async function create(
 
     // Get staff members
     const unit = await prisma.unit.findUnique({
-      where: { nama_unit: data.unitId },
+      where: { id: data.unitId },
     });
 
     const staff = await prisma.user.findMany({
