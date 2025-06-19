@@ -31,31 +31,50 @@ export async function create(
       },
     });
 
-    // Get staff members
-    const unit = await prisma.unit.findUnique({
-      where: { id: data.unitId },
-    });
+    // // Get staff members
+    // const unit = await prisma.unit.findUnique({
+    //   where: { nama_unit: data.unitId },
+    // });
 
     const staff = await prisma.user.findMany({
       where: {
-        unitId: unit?.id,
+        unitId: data.unitId,
         userLevel: {
           name: {
-            in: ["PETUGAS", "KEPALA_PETUGAS_UNIT"],
+            in: ["PETUGAS"],
           },
         },
       },
     });
 
-    Logger.info(
-      "staff id:",
-      staff.map((s) => s.no_identitas)
-    );
+    const unit = await prisma.unit.findUnique({
+      where: {
+        id: data.unitId,
+      },
+      include: {
+        kepalaUnit: {
+          select: {
+            no_identitas: true,
+            name: true,
+          },
+        },
+      },
+    });
+
     // Send notifications to all staff members
     for (const staffMember of staff) {
       await NotificationUtils.sendNewComplaintNotification(
         data,
         staffMember.no_identitas,
+        pengaduan.id
+      );
+    }
+
+    // Send notification to kepala unit if exists
+    if (unit?.kepalaUnit?.no_identitas) {
+      await NotificationUtils.sendNewComplaintNotification(
+        data,
+        unit.kepalaUnit.no_identitas,
         pengaduan.id
       );
     }
