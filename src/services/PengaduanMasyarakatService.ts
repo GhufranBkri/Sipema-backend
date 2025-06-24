@@ -12,6 +12,7 @@ import { buildFilterQueryLimitOffsetV2 } from "./helpers/FilterQueryV2";
 import { UserJWTDAO } from "$entities/User";
 import WaService from "./waService";
 import { PengaduanDTO } from "$entities/Pengaduan";
+import { BackgroundProcessor } from "$utils/BackgroundProcessor.utils";
 
 const waService = new WaService();
 
@@ -20,7 +21,7 @@ export async function create(
   data: PengaduanDTO
 ): Promise<ServiceResponse<CreateResponse>> {
   try {
-    // Create pengaduan
+    // Create pengaduan with optimized data structure
     const pengaduan = await prisma.pengaduan.create({
       data: {
         ...data,
@@ -28,9 +29,18 @@ export async function create(
       },
     });
 
-    // Send WhatsApp notification
+    // Send WhatsApp notification using background processor
     if (data.no_telphone) {
-      await waService.sendMessage(data.no_telphone, data, pengaduan.id);
+      BackgroundProcessor.addTask(async () => {
+        try {
+          await waService.sendMessage(data.no_telphone!, data, pengaduan.id);
+        } catch (error) {
+          Logger.error(
+            `WhatsApp notification failed for pengaduan ${pengaduan.id}:`,
+            error
+          );
+        }
+      });
     }
 
     return {
@@ -186,29 +196,49 @@ export async function update(
   try {
     let pengaduanMasyarakat = await prisma.pengaduan.findUnique({
       where: { id },
+      select: {
+        id: true,
+        no_telphone: true,
+      },
     });
 
     if (!pengaduanMasyarakat) return INVALID_ID_SERVICE_RESPONSE;
 
-    // Update only allowed fields
-    pengaduanMasyarakat = await prisma.pengaduan.update({
+    // Update with optimized field selection
+    const updatedPengaduan = await prisma.pengaduan.update({
       where: { id },
       data: {
         ...data,
         approvedBy: user.no_identitas,
       },
+      // Include all required fields for WhatsApp service
+      include: {
+        unit: true,
+        kategori: true,
+      },
     });
 
-    // Send WhatsApp notification
-    const waService = new WaService();
-    await waService.sendStatusUpdate(
-      pengaduanMasyarakat.no_telphone || "",
-      pengaduanMasyarakat
-    );
+    // Send WhatsApp notification using background processor
+    if (updatedPengaduan.no_telphone) {
+      BackgroundProcessor.addTask(async () => {
+        try {
+          const waService = new WaService();
+          await waService.sendStatusUpdate(
+            updatedPengaduan.no_telphone!,
+            updatedPengaduan
+          );
+        } catch (error) {
+          Logger.error(
+            `WhatsApp status update failed for pengaduan ${id}:`,
+            error
+          );
+        }
+      });
+    }
 
     return {
       status: true,
-      data: pengaduanMasyarakat,
+      data: updatedPengaduan,
     };
   } catch (err) {
     Logger.error(`PengaduanMasyarakatService.update : ${err}`);
