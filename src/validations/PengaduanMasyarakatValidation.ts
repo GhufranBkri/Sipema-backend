@@ -29,6 +29,25 @@ export async function validatePengaduanMasyarakatDTO(c: Context, next: Next) {
       generateErrorStructure("no_telphone", "cannot be empty")
     );
 
+  // Character length validation
+  if (data.judul && String(data.judul).length > 50) {
+    invalidFields.push(
+      generateErrorStructure("judul", "cannot exceed 50 characters")
+    );
+  }
+
+  if (data.deskripsi && String(data.deskripsi).length > 150) {
+    invalidFields.push(
+      generateErrorStructure("deskripsi", "cannot exceed 150 characters")
+    );
+  }
+
+  if (data.harapan_pelapor && String(data.harapan_pelapor).length > 100) {
+    invalidFields.push(
+      generateErrorStructure("harapan_pelapor", "cannot exceed 100 characters")
+    );
+  }
+
   // NIK format validation
   if (data.NIK) {
     const nikValidationResult = validateNIKFormat(String(data.NIK));

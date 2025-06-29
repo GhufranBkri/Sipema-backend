@@ -41,7 +41,7 @@ async function isDuplicatePengaduan(data: PengaduanDTO): Promise<boolean> {
 }
 
 export async function validatePengaduanDTO(c: Context, next: Next) {
-  const data: PengaduanDTO = await c.req.json();
+  const data = await c.req.json();
   const invalidFields: ErrorStructure[] = [];
   const existingUnit = await prisma.unit.findUnique({
     where: { id: data.unitId },
@@ -68,6 +68,25 @@ export async function validatePengaduanDTO(c: Context, next: Next) {
     invalidFields.push(
       generateErrorStructure("kategoriId", "category not found")
     );
+
+  // Character length validation
+  if (data.judul && String(data.judul).length > 50) {
+    invalidFields.push(
+      generateErrorStructure("judul", "cannot exceed 50 characters")
+    );
+  }
+
+  if (data.deskripsi && String(data.deskripsi).length > 150) {
+    invalidFields.push(
+      generateErrorStructure("deskripsi", "cannot exceed 150 characters")
+    );
+  }
+
+  if (data.harapan_pelapor && String(data.harapan_pelapor).length > 100) {
+    invalidFields.push(
+      generateErrorStructure("harapan_pelapor", "cannot exceed 100 characters")
+    );
+  }
 
   // Check for duplicate complaint
   if (invalidFields.length === 0) {

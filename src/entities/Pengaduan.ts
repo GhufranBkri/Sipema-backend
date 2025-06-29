@@ -13,6 +13,7 @@ export interface PengaduanDTO {
   nama?: string;
   no_telphone: string;
   filePendukung: string;
+  harapan_pelapor?: string;
   tipePengaduan: TypePengaduan;
   filePetugas?: string;
   harapanPelapor?: string;
